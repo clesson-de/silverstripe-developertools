@@ -1,9 +1,17 @@
 de:
   Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
-    MENUTITLE: 'Packages'
+    MENUTITLE: 'Developer Tools'
+    TAB_MAIN: 'Developer Tools'
+    TAB_COMPOSER_PACKAGES: 'Composer-Pakete'
     COLUMN_NAME: 'Paket'
     COLUMN_VERSION: 'Version'
     COLUMN_TYPE: 'Typ'
     COLUMN_LICENSE: 'Lizenz'
     COLUMN_DESCRIPTION: 'Beschreibung'
     SEARCH_PLACEHOLDER: 'Nach Name oder Beschreibung suchen…'
+    TAB_ROUTES: 'Routen'
+    ROUTES_COLUMN_PATTERN: 'Route'
+    ROUTES_COLUMN_CONTROLLER: 'Controller'
+    ROUTES_COLUMN_ACTION: 'Action'
+    ROUTES_COLUMN_PACKAGE: 'Paket'
+    ROUTES_SEARCH_PLACEHOLDER: 'Nach Route, Controller oder Paket suchen…'
