@@ -1,0 +1,26 @@
+{
+    "name": "clesson-de/silverstripe-composer-packages",
+    "description": "CMS admin section listing all installed Composer packages with their versions.",
+    "type": "silverstripe-vendormodule",
+    "license": "BSD-3-Clause",
+    "keywords": ["silverstripe", "composer", "packages", "versions"],
+    "authors": [
+        {
+            "name": "Kai Feldmaier",
+            "email": "kai.feldmaier@clesson.de",
+            "homepage": "https://clesson.de"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "silverstripe/framework": "^6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Clesson\\Silverstripe\\ComposerPackages\\": "src/"
+        }
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev"
+}
+

@@ -1,0 +1,9 @@
+de:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Packages'
+    COLUMN_NAME: 'Paket'
+    COLUMN_VERSION: 'Version'
+    COLUMN_TYPE: 'Typ'
+    COLUMN_LICENSE: 'Lizenz'
+    COLUMN_DESCRIPTION: 'Beschreibung'
+    SEARCH_PLACEHOLDER: 'Nach Name oder Beschreibung suchen…'

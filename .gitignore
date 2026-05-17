@@ -1,0 +1,10 @@
+# Dependencies
+/vendor/
+
+# IDE settings
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+
