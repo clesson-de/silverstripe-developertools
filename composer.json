@@ -1,6 +1,6 @@
 {
-    "name": "clesson-de/silverstripe-composer-packages",
-    "description": "CMS admin section listing all installed Composer packages with their versions.",
+    "name": "clesson-de/silverstripe-developertools",
+    "description": "A collection of developer tools for Silverstripe CMS, accessible directly from the CMS admin panel.",
     "type": "silverstripe-vendormodule",
     "license": "BSD-3-Clause",
     "keywords": ["silverstripe", "composer", "packages", "versions"],
