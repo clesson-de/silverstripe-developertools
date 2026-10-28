@@ -1,0 +1,17 @@
+{
+  "name": "silverstripe-developertools-admin",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/frontend/*.test.mjs",
+    "build:js": "rollup -c",
+    "build:css": "sass client/admin/src/scss/main.scss client/admin/dist/bundle.css --no-source-map",
+    "build": "npm run build:js && npm run build:css",
+    "watch:js": "rollup -c --watch",
+    "watch:css": "sass --watch client/admin/src/scss/main.scss client/admin/dist/bundle.css --no-source-map"
+  },
+  "devDependencies": {
+    "jsdom": "^26.0.0",
+    "rollup": "^4.0.0",
+    "sass": "^1.0.0"
+  }
+}

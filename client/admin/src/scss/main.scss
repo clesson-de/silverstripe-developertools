@@ -1,0 +1,92 @@
+.monitoring-details {
+  padding: 1rem;
+  overflow-x: auto;
+
+  small {
+    display: block;
+    overflow-wrap: anywhere;
+  }
+}
+
+.monitoring-error {
+  color: #a11b1b;
+  font-weight: 600;
+}
+
+.monitoring-status-icon::before {
+  display: inline-block;
+  width: 1.25rem;
+  font-weight: bold;
+  content: '?';
+}
+
+.monitoring-status--current {
+  color: #226b32;
+  .monitoring-status-icon::before { content: '\2713'; }
+}
+
+.monitoring-status--update {
+  color: #856000;
+  .monitoring-status-icon::before { content: '\26a0'; }
+}
+
+.monitoring-status--failed {
+  color: #a11b1b;
+  .monitoring-status-icon::before { content: '\2717'; }
+}
+
+.monitoring-status--unknown {
+  color: #606060;
+}
+
+.developer-tools-monitoring .col-ActionRequired [role='img'],
+.monitoring-websites-panel [role='img'] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  vertical-align: middle;
+
+  .monitoring-status-icon::before {
+    width: auto;
+    font-size: 1.75rem;
+    line-height: 1;
+  }
+
+  &.monitoring-status--current {
+    color: #185b28;
+    background-color: #e4f3e8;
+  }
+
+  &.monitoring-status--update {
+    color: #754b00;
+    background-color: #fff0bf;
+  }
+
+  &.monitoring-status--unknown {
+    color: #444;
+    background-color: #eee;
+  }
+
+  &.monitoring-status--failed {
+    color: #8b1515;
+    background-color: #fce6e6;
+  }
+}
+
+.monitoring-health--ok { color: #185b28; }
+.monitoring-health--warning { color: #754b00; }
+.monitoring-health--error { color: #8b1515; }
+.monitoring-health--unknown { color: #444; }
+
+.monitoring-signal {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .25rem;
+  margin: 0 .75rem .25rem 0;
+  vertical-align: top;
+}

@@ -1,0 +1,8 @@
+---
+Name: developertools-routes
+Before:
+  - '#coreroutes'
+---
+SilverStripe\Control\Director:
+  rules:
+    'developer-tools/project-information': 'Clesson\Silverstripe\DeveloperTools\Controllers\ProjectInformationController'

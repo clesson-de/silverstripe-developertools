@@ -1,6 +1,6 @@
 {
     "name": "clesson-de/silverstripe-developertools",
-    "description": "A collection of developer tools for Silverstripe CMS, accessible directly from the CMS admin panel.",
+    "description": "CMS developer tools with project versions, Composer packages, routes and a token-protected JSON endpoint.",
     "type": "silverstripe-vendormodule",
     "license": "BSD-3-Clause",
     "keywords": ["silverstripe", "composer", "packages", "versions"],
@@ -13,14 +13,23 @@
     ],
     "require": {
         "php": "^8.1",
-        "silverstripe/framework": "^6"
+        "silverstripe/framework": "^6",
+        "silverstripe/admin": "^3",
+        "clesson-de/silverstripe-dashboard": "^1",
+        "lekoala/silverstripe-encrypt": "^5",
+        "guzzlehttp/guzzle": "^7",
+        "composer/semver": "^3",
+        "psr/simple-cache": "^3",
+        "ext-curl": "*"
     },
     "autoload": {
         "psr-4": {
-            "Clesson\\Silverstripe\\ComposerPackages\\": "src/"
+            "Clesson\\Silverstripe\\DeveloperTools\\": "src/"
         }
+    },
+    "extra": {
+        "expose": ["client/admin/dist"]
     },
     "prefer-stable": true,
     "minimum-stability": "dev"
 }
-

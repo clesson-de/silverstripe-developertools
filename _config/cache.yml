@@ -1,0 +1,9 @@
+---
+Name: developertools-cache
+---
+SilverStripe\Core\Injector\Injector:
+  Psr\SimpleCache\CacheInterface.DeveloperToolsReleases:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: 'DeveloperToolsReleases'
+      defaultLifetime: 2592000

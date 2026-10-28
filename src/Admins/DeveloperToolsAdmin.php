@@ -4,279 +4,172 @@ declare(strict_types=1);
 
 namespace Clesson\Silverstripe\DeveloperTools\Admins;
 
-use Clesson\Silverstripe\DeveloperTools\Helpers\ComposerLockReader;
-use Clesson\Silverstripe\DeveloperTools\Helpers\RoutesReader;
-use SilverStripe\Admin\LeftAndMain;
-use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\Form;
-use SilverStripe\Forms\GridField\GridField;
-use SilverStripe\Forms\GridField\GridFieldConfig;
-use SilverStripe\Forms\GridField\GridFieldDataColumns;
-use SilverStripe\Forms\GridField\GridFieldPaginator;
-use SilverStripe\Forms\GridField\GridFieldSortableHeader;
-use SilverStripe\Forms\GridField\GridFieldToolbarHeader;
-use SilverStripe\Forms\LiteralField;
-use SilverStripe\Forms\Tab;
-use SilverStripe\Forms\TabSet;
+use Clesson\Silverstripe\DeveloperTools\Constants\ProjectInformationField;
+use Clesson\Silverstripe\DeveloperTools\Constants\MonitoringStatus;
+use Clesson\Silverstripe\DeveloperTools\Models\DeveloperToolsConfig;
+use Clesson\Silverstripe\DeveloperTools\Models\MonitoredWebsite;
+use Clesson\Silverstripe\DeveloperTools\Services\MonitoringCheckService;
+use Clesson\Silverstripe\DeveloperTools\Services\MonitoringTableRenderer;
+use Clesson\Silverstripe\DeveloperTools\Services\ProjectInformationService;
+use SilverStripe\Admin\SingleRecordAdmin;
+use SilverStripe\Control\HTTPResponse;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Security\SecurityToken;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\Security;
+use SilverStripe\Model\ArrayData;
+use SilverStripe\ORM\FieldType\DBField;
 
 /**
- * CMS admin section providing developer tools.
- *
- * Currently includes:
- * - Composer Packages: lists all installed packages from composer.lock.
- *
- * Only accessible to CMS administrators.
+ * Administrator-only singleton editor and dashboard content endpoint.
  *
  * @package Clesson\Silverstripe\DeveloperTools
  * @subpackage Admins
  */
-class DeveloperToolsAdmin extends LeftAndMain
+class DeveloperToolsAdmin extends SingleRecordAdmin
 {
-    /**
-     * @config
-     */
+    /** @config */
     private static string $url_segment = 'developer-tools';
 
-    /**
-     * @config
-     */
+    /** @config */
     private static string $menu_title = 'Developer Tools';
 
-    /**
-     * @config
-     */
+    /** @config */
     private static float $menu_priority = -200;
 
-    /**
-     * @config
-     */
+    /** @config */
     private static string $menu_icon_class = 'font-icon-list';
 
-    /**
-     * @config
-     */
+    /** @config */
     private static string $required_permission_codes = 'ADMIN';
 
-    /**
-     * @inheritdoc
-     */
+    /** @config */
+    private static string $model_class = DeveloperToolsConfig::class;
+
+    /** @config */
+    private static bool $restrict_to_single_record = true;
+
+    /** @config */
+    private static bool $allow_new_record = true;
+
+    /** @config */
     private static array $allowed_actions = [
-        'index',
+        'projectInformationPanel',
+        'monitoringDetails',
+        'monitoringCheck',
+        'monitoringWebsitesPanel',
     ];
 
     /**
-     * Only administrators may access this section.
-     *
-     * @param \SilverStripe\Security\Member|null $member
-     * @return bool
+     * Only administrators may access the editor and its dashboard panel.
      */
     public function canView($member = null): bool
     {
-        if ($member === null) {
-            $member = Security::getCurrentUser();
+        return Permission::check('ADMIN', 'any', $member ?? Security::getCurrentUser());
+    }
+
+    /**
+     * Renders project versions for the dashboard without exposing an API token.
+     */
+    public function projectInformationPanel(): HTTPResponse
+    {
+        if (!$this->canView()) {
+            return HTTPResponse::create('', 403);
         }
-
-        return Permission::check('ADMIN', 'any', $member);
+        $rows = [];
+        foreach (ProjectInformationService::singleton()->getInformation() as $key => $value) {
+            $rows[] = ['Label' => ProjectInformationField::label($key), 'Value' => $value];
+        }
+        $html = ArrayData::create(['Rows' => $rows])->renderWith(
+            'Clesson/Silverstripe/DeveloperTools/ProjectInformationPanel'
+        );
+        return HTTPResponse::create((string) $html)
+            ->addHeader('Content-Type', 'text/html; charset=utf-8')
+            ->addHeader('Cache-Control', 'private, no-store');
     }
 
-    /**
-     * Returns the edit form containing the developer tools TabSet.
-     *
-     * @param int|null       $id     Not used.
-     * @param FieldList|null $fields Not used.
-     * @return Form
-     */
-    public function getEditForm($id = null, $fields = null): Form
+    /** Returns cached version details to administrators only. */
+    public function monitoringDetails(HTTPRequest $request): HTTPResponse
     {
-        $form = Form::create(
-            $this,
-            'EditForm',
-            FieldList::create(
-                TabSet::create(
-                    'Root',
-                    Tab::create(
-                        'Main',
-                        _t(__CLASS__ . '.TAB_MAIN', 'Developer Tools'),
-                        TabSet::create(
-                            'ToolsTabSet',
-                            $this->buildComposerPackagesTab(),
-                            $this->buildRoutesTab()
-                        )
-                    )
-                )
-            ),
-            FieldList::create()
-        );
-
-        $form->setHTMLID('Form_EditForm');
-        $form->addExtraClass('cms-edit-form');
-        $form->setTemplate($this->getTemplatesWithSuffix('_EditForm'));
-        $form->addExtraClass('center ss-tabset cms-tabset ' . $this->BaseCSSClasses());
-        $form->setAttribute('data-pjax-fragment', 'CurrentForm');
-
-        return $form;
+        if (!$this->canView()) {
+            return HTTPResponse::create('', 403);
+        }
+        $website = $this->monitoringWebsite($request);
+        if (!$website) {
+            return HTTPResponse::create('', 404);
+        }
+        return HTTPResponse::create(MonitoringTableRenderer::create()->render($website))
+            ->addHeader('Content-Type', 'text/html; charset=utf-8')
+            ->addHeader('Cache-Control', 'private, no-store');
     }
 
-    /**
-     * Builds the "Composer Packages" tab.
-     *
-     * @return Tab
-     */
-    private function buildComposerPackagesTab(): Tab
+    /** Lists every configured website without making customer or provider requests. */
+    public function monitoringWebsitesPanel(): HTTPResponse
     {
-        $packages = ComposerLockReader::getPackages();
-
-        /** @var GridFieldDataColumns $dataColumns */
-        $dataColumns = GridFieldDataColumns::create();
-        $dataColumns->setDisplayFields([
-            'PackageName' => _t(__CLASS__ . '.COLUMN_NAME', 'Package'),
-            'Version'     => _t(__CLASS__ . '.COLUMN_VERSION', 'Version'),
-            'Type'        => _t(__CLASS__ . '.COLUMN_TYPE', 'Type'),
-            'License'     => _t(__CLASS__ . '.COLUMN_LICENSE', 'License'),
-            'Description' => _t(__CLASS__ . '.COLUMN_DESCRIPTION', 'Description'),
-        ]);
-
-        $gridConfig = GridFieldConfig::create();
-        $gridConfig->addComponent(GridFieldToolbarHeader::create());
-        $gridConfig->addComponent(GridFieldSortableHeader::create());
-        $gridConfig->addComponent($dataColumns);
-        $gridConfig->addComponent(GridFieldPaginator::create(50));
-
-        /** @var GridField $packagesField */
-        $packagesField = GridField::create(
-            'Packages',
-            '',
-            $packages,
-            $gridConfig
-        );
-
-        $placeholder = _t(__CLASS__ . '.SEARCH_PLACEHOLDER', 'Search by name or description…');
-
-        /** @var LiteralField $searchField */
-        $searchField = LiteralField::create('PackagesSearch', '
-            <div class="developer-tools-search-wrap" style="margin-bottom:12px">
-                <input
-                    type="text"
-                    class="developer-tools-search text no-change-track"
-                    placeholder="' . htmlspecialchars($placeholder, ENT_QUOTES, 'UTF-8') . '"
-                    style="max-width:400px;width:100%"
-                />
-            </div>
-            <script>
-            (function () {
-                function initSearch() {
-                    var input = document.querySelector(\'.developer-tools-search\');
-                    if (!input) return;
-
-                    input.addEventListener(\'input\', function () {
-                        var q = this.value.toLowerCase();
-                        var rows = document.querySelectorAll(\'#Form_EditForm .grid-field__table tbody tr\');
-                        rows.forEach(function (row) {
-                            row.style.display = (q === \'\' || row.textContent.toLowerCase().includes(q)) ? \'\' : \'none\';
-                        });
-                    });
-                }
-
-                if (document.readyState === \'loading\') {
-                    document.addEventListener(\'DOMContentLoaded\', initSearch);
-                } else {
-                    initSearch();
-                }
-
-                // Re-attach after PJAX replacements
-                document.addEventListener(\'ajaxComplete\', initSearch);
-            })();
-            </script>
-        ');
-
-        return Tab::create(
-            'ComposerPackages',
-            _t(__CLASS__ . '.TAB_COMPOSER_PACKAGES', 'Composer Packages'),
-            $searchField,
-            $packagesField
-        );
+        if (!$this->canView()) {
+            return HTTPResponse::create('', 403);
+        }
+        $rows = [];
+        foreach (DeveloperToolsConfig::currentRecord()->Websites() as $website) {
+            $rows[] = [
+                'Name' => $website->Name, 'BaseURL' => $website->BaseURL,
+                'Indicator' => DBField::create_field('HTMLText', MonitoringTableRenderer::create()->renderActionRequired($website)),
+            ];
+        }
+        return $this->monitoringPanelResponse($rows);
     }
 
-    /**
-     * Builds the "Routes" tab listing all Director rules.
-     *
-     * @return Tab
-     */
-    private function buildRoutesTab(): Tab
+    /** Returns escaped panel content with private no-store caching. */
+    private function monitoringPanelResponse(array $rows): HTTPResponse
     {
-        $routes = RoutesReader::getRoutes();
+        $html = ArrayData::create([
+            'Rows' => $rows,
+            'WebsiteTitle' => _t(__CLASS__ . '.WEBSITE', 'Website'),
+            'ActionTitle' => _t(__CLASS__ . '.ACTION_REQUIRED', 'Action required'),
+            'Empty' => _t(__CLASS__ . '.NO_WEBSITES', 'No websites have been configured.'),
+        ])->renderWith('Clesson/Silverstripe/DeveloperTools/MonitoringWebsitesPanel');
+        return HTTPResponse::create((string) $html)
+            ->addHeader('Content-Type', 'text/html; charset=utf-8')
+            ->addHeader('Cache-Control', 'private, no-store');
+    }
 
-        /** @var GridFieldDataColumns $dataColumns */
-        $dataColumns = GridFieldDataColumns::create();
-        $dataColumns->setDisplayFields([
-            'RoutePattern' => _t(__CLASS__ . '.ROUTES_COLUMN_PATTERN', 'Route'),
-            'Controller'   => _t(__CLASS__ . '.ROUTES_COLUMN_CONTROLLER', 'Controller'),
-            'Action'       => _t(__CLASS__ . '.ROUTES_COLUMN_ACTION', 'Action'),
-            'Package'      => _t(__CLASS__ . '.ROUTES_COLUMN_PACKAGE', 'Package'),
-        ]);
+    /** Starts a bounded site check using a CSRF-protected administrator POST. */
+    public function monitoringCheck(HTTPRequest $request): HTTPResponse
+    {
+        if (!$this->canView()) {
+            return HTTPResponse::create('', 403);
+        }
+        if ($request->httpMethod() !== 'POST') {
+            return HTTPResponse::create('', 405)->addHeader('Allow', 'POST');
+        }
+        if (!SecurityToken::inst()->checkRequest($request)) {
+            return HTTPResponse::create('', 403);
+        }
+        return $this->performMonitoringCheck($request);
+    }
 
-        $gridConfig = GridFieldConfig::create();
-        $gridConfig->addComponent(GridFieldToolbarHeader::create());
-        $gridConfig->addComponent(GridFieldSortableHeader::create());
-        $gridConfig->addComponent($dataColumns);
-        $gridConfig->addComponent(GridFieldPaginator::create(50));
+    /** Keeps network errors visible while preserving the last valid inventory. */
+    private function performMonitoringCheck(HTTPRequest $request): HTTPResponse
+    {
+        $website = $this->monitoringWebsite($request);
+        if (!$website) {
+            return HTTPResponse::create('', 404);
+        }
+        $check = MonitoringCheckService::singleton()->check($website);
+        $website = MonitoredWebsite::get()->byID($website->ID);
+        return HTTPResponse::create(json_encode([
+            'status' => $check->Status, 'html' => MonitoringTableRenderer::create()->render($website),
+            'action_required_html' => MonitoringTableRenderer::create()->renderActionRequired($website),
+            'status_label' => MonitoringStatus::label($website->LastStatus),
+            'checked_at' => $website->LastCheckedAt, 'change_at' => $website->getLastChangeAt(),
+        ], JSON_THROW_ON_ERROR))
+            ->addHeader('Content-Type', 'application/json; charset=utf-8')
+            ->addHeader('Cache-Control', 'private, no-store');
+    }
 
-        /** @var GridField $routesField */
-        $routesField = GridField::create(
-            'Routes',
-            '',
-            $routes,
-            $gridConfig
-        );
-
-        $placeholder = _t(__CLASS__ . '.ROUTES_SEARCH_PLACEHOLDER', 'Search by route, controller or package…');
-
-        /** @var LiteralField $searchField */
-        $searchField = LiteralField::create('RoutesSearch', '
-            <div class="developer-tools-search-wrap" style="margin-bottom:12px">
-                <input
-                    type="text"
-                    class="developer-tools-routes-search text no-change-track"
-                    placeholder="' . htmlspecialchars($placeholder, ENT_QUOTES, 'UTF-8') . '"
-                    style="max-width:400px;width:100%"
-                />
-            </div>
-            <script>
-            (function () {
-                function initRoutesSearch() {
-                    var input = document.querySelector(\'.developer-tools-routes-search\');
-                    if (!input || input._dtInitialized) return;
-                    input._dtInitialized = true;
-
-                    input.addEventListener(\'input\', function () {
-                        var q = this.value.toLowerCase();
-                        var grid = this.closest(\'.tab\') || document;
-                        var rows = grid.querySelectorAll(\'.grid-field__table tbody tr\');
-                        rows.forEach(function (row) {
-                            row.style.display = (q === \'\' || row.textContent.toLowerCase().includes(q)) ? \'\' : \'none\';
-                        });
-                    });
-                }
-
-                if (document.readyState === \'loading\') {
-                    document.addEventListener(\'DOMContentLoaded\', initRoutesSearch);
-                } else {
-                    initRoutesSearch();
-                }
-
-                document.addEventListener(\'ajaxComplete\', initRoutesSearch);
-            })();
-            </script>
-        ');
-
-        return Tab::create(
-            'Routes',
-            _t(__CLASS__ . '.TAB_ROUTES', 'Routes'),
-            $searchField,
-            $routesField
-        );
+    /** Restricts records to this singleton instead of accepting arbitrary site IDs. */
+    private function monitoringWebsite(HTTPRequest $request): ?MonitoredWebsite
+    {
+        return DeveloperToolsConfig::currentRecord()->Websites()->byID((int) $request->param('ID'));
     }
 }
-
