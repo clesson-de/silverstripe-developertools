@@ -38,7 +38,7 @@ use SilverStripe\Security\Permission;
  * @property string $LastError
  * @property int $ConfigID
  * @property int $LatestSnapshotID
- * @property-write string $ReplacementToken
+ * @property-write string|null $ReplacementToken
  * @property-read string|null $LastChangeAt
  * @method DeveloperToolsConfig Config()
  * @method MonitoringSnapshot LatestSnapshot()
@@ -107,10 +107,10 @@ class MonitoredWebsite extends DataObject
         return $this->setEncryptedField($fieldName, $value);
     }
 
-    /** Blank edits retain the credential; no plaintext replacement is held separately. */
-    public function setReplacementToken(string $value): static
+    /** Null or blank edits retain the credential; no plaintext replacement is held separately. */
+    public function setReplacementToken(?string $value): static
     {
-        if ($value !== '') {
+        if ($value !== null && $value !== '') {
             $this->setEncryptedField(F::API_TOKEN, $value);
         }
         return $this;

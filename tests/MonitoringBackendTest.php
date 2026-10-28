@@ -248,6 +248,21 @@ class MonitoringBackendTest extends SapphireTest
         MonitoringCheckService::create()->check($website);
     }
 
+    /** Null replacements through every setter path retain the persisted credential. */
+    public function testNullReplacementTokenRetainsCredential(): void
+    {
+        $website = $this->website();
+        $website->ReplacementToken = null;
+        $website->write();
+        self::assertSame(self::TOKEN, MonitoredWebsite::get()->byID($website->ID)->ApiToken);
+        $website->setReplacementToken(null);
+        $website->write();
+        self::assertSame(self::TOKEN, MonitoredWebsite::get()->byID($website->ID)->ApiToken);
+        $website->setField('ReplacementToken', null);
+        $website->write();
+        self::assertSame(self::TOKEN, MonitoredWebsite::get()->byID($website->ID)->ApiToken);
+    }
+
     /** Loading/saving an empty password input never clears or displays the old token. */
     private function assertCredentialPersistence(MonitoredWebsite $website): void
     {
