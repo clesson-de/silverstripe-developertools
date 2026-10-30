@@ -1,0 +1,13 @@
+---
+Name: developertools-offline
+After:
+  - '#requestprocessors'
+Before:
+  - '#coresecurity'
+  - '#url_specials-middleware'
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Control\Director:
+    properties:
+      Middlewares:
+        DeveloperToolsOfflineMiddleware: '%$Clesson\Silverstripe\DeveloperTools\Middleware\OfflineMiddleware'

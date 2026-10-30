@@ -1,0 +1,10 @@
+---
+Name: developertools-middleware
+Before:
+  - '#requestprocessors'
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Control\Director:
+    properties:
+      Middlewares:
+        DeveloperToolsToastMiddleware: '%$Clesson\Silverstripe\DeveloperTools\Middleware\ToastMiddleware'
