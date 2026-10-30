@@ -10,8 +10,12 @@ use Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet;
 use Clesson\Silverstripe\DeveloperTools\Forms\GridFieldConfig_WebsitesInConfiguration;
 use Clesson\Silverstripe\DeveloperTools\Forms\GridFieldConfig_WebsitesInInfo;
 use Clesson\Silverstripe\DeveloperTools\Forms\GridFieldConfig_ToastMessages;
+use Clesson\Silverstripe\DeveloperTools\Constants\ToastEnvironment;
 use Clesson\Silverstripe\DeveloperTools\Constants\ToastField;
+use Clesson\Silverstripe\DeveloperTools\Constants\ToastHorizontalPosition;
 use Clesson\Silverstripe\DeveloperTools\Constants\OfflineField;
+use Clesson\Silverstripe\DeveloperTools\Constants\ToastType;
+use Clesson\Silverstripe\DeveloperTools\Constants\ToastVerticalPosition;
 use Clesson\Silverstripe\DeveloperTools\Forms\OfflineModeTab;
 use Clesson\Silverstripe\DeveloperTools\Services\OfflineMode;
 use Clesson\Silverstripe\DeveloperTools\Panels\ProjectInformationPanel;
@@ -51,6 +55,10 @@ class DeveloperToolsConfig extends DataObject
     public const TITLE_FIELD = 'Title';
     /** Members receiving automatic monitoring summaries. */
     public const NOTIFY_MEMBERS = 'NotifyMembers';
+    /** Default warning shown in non-live environments after installation. */
+    private const DEFAULT_REVIEW_TOAST_TITLE = 'Test environment';
+    /** English default message to avoid confusion on non-live systems. */
+    private const DEFAULT_REVIEW_TOAST_MESSAGE = 'This is a test environment. Changes here are not for production approval.';
 
     /** @config */
     private static string $table_name = 'DeveloperTools_Config';
@@ -107,10 +115,33 @@ class DeveloperToolsConfig extends DataObject
     public function requireDefaultRecords(): void
     {
         parent::requireDefaultRecords();
-        if (!static::get()->exists()) {
-            static::currentRecord();
+        $recordExisted = static::get()->exists();
+        $record = static::currentRecord();
+        if (!$recordExisted) {
             DB::alteration_message('Created default DeveloperToolsConfig record', 'created');
         }
+        $this->ensureDefaultReviewToast($record);
+    }
+
+    /** Creates one default overlay for dev/review when no custom overlay exists yet. */
+    private function ensureDefaultReviewToast(self $record): void
+    {
+        if ($record->ToastMessages()->exists()) {
+            return;
+        }
+        ToastMessage::create([
+            ToastField::SETTINGS . 'ID' => $record->ID,
+            ToastField::TITLE => self::DEFAULT_REVIEW_TOAST_TITLE,
+            ToastField::MESSAGE => self::DEFAULT_REVIEW_TOAST_MESSAGE,
+            ToastField::TYPE => ToastType::ALERT,
+            ToastField::ENVIRONMENT => ToastEnvironment::DEV,
+            ToastField::AUTO_HIDE_SECONDS => 0,
+            ToastField::REMOVABLE => true,
+            ToastField::HORIZONTAL_POSITION => ToastHorizontalPosition::RIGHT,
+            ToastField::VERTICAL_POSITION => ToastVerticalPosition::BOTTOM,
+            ToastField::ACTIVE => true,
+        ])->write();
+        DB::alteration_message('Created default test-environment overlay for dev/review', 'created');
     }
 
     /** @inheritdoc */

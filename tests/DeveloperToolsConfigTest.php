@@ -7,6 +7,7 @@ namespace Clesson\Silverstripe\DeveloperTools\Tests;
 use Clesson\Silverstripe\Dashboard\Forms\DashboardField;
 use Clesson\Silverstripe\Hints\Forms\HintField;
 use Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin;
+use Clesson\Silverstripe\DeveloperTools\Constants\ToastType;
 use Clesson\Silverstripe\DeveloperTools\Models\DeveloperToolsConfig;
 use Clesson\Silverstripe\DeveloperTools\Models\ToastMessage;
 use Clesson\Silverstripe\DeveloperTools\Panels\ProjectInformationPanel;
@@ -40,6 +41,16 @@ class DeveloperToolsConfigTest extends FunctionalTest
         self::assertSame($config->ID, DeveloperToolsConfig::currentRecord()->ID);
         $config->requireDefaultRecords();
         self::assertSame(1, DeveloperToolsConfig::get()->count());
+        self::assertSame(1, $config->ToastMessages()->count());
+        $defaultToast = $config->ToastMessages()->first();
+        self::assertSame('Test environment', $defaultToast->Title);
+        self::assertSame('This is a test environment. Changes here are not for production approval.',
+            $defaultToast->dbObject('Message')->getPlain());
+        self::assertSame('dev', $defaultToast->Environment);
+        self::assertSame(ToastType::ALERT, $defaultToast->Type);
+        self::assertSame('right', $defaultToast->HorizontalPosition);
+        self::assertSame('bottom', $defaultToast->VerticalPosition);
+        self::assertSame(0, $defaultToast->AutoHideSeconds);
         self::assertFalse($config->canView());
         self::assertFalse($config->canEdit());
         self::assertFalse($config->canCreate());
