@@ -1,0 +1,172 @@
+#developer-tools-toasts {
+  --dt-toast-gap: 0.75rem;
+  position: fixed;
+  inset: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  z-index: 2147483000;
+  display: grid;
+  grid-template: repeat(3, minmax(0, 1fr))/repeat(3, minmax(0, 1fr));
+  gap: var(--dt-toast-gap);
+  pointer-events: none;
+  font: 1rem/1.5 system-ui, sans-serif;
+  color: #17212b;
+  text-align: left;
+}
+#developer-tools-toasts, #developer-tools-toasts * {
+  box-sizing: border-box;
+}
+#developer-tools-toasts .dt-toast-region {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-toast-gap);
+  width: 100%;
+  max-width: 24rem;
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  pointer-events: auto;
+  scrollbar-width: thin;
+}
+#developer-tools-toasts .dt-toast-region[data-horizontal=left] {
+  grid-column: 1;
+  justify-self: start;
+}
+#developer-tools-toasts .dt-toast-region[data-horizontal=center] {
+  grid-column: 2;
+  justify-self: center;
+}
+#developer-tools-toasts .dt-toast-region[data-horizontal=right] {
+  grid-column: 3;
+  justify-self: end;
+}
+#developer-tools-toasts .dt-toast-region[data-vertical=top] {
+  grid-row: 1;
+  align-self: start;
+}
+#developer-tools-toasts .dt-toast-region[data-vertical=center] {
+  grid-row: 2;
+  align-self: center;
+}
+#developer-tools-toasts .dt-toast-region[data-vertical=bottom] {
+  grid-row: 3;
+  align-self: end;
+}
+#developer-tools-toasts .dt-toast {
+  flex: none;
+  width: 100%;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid #78a8d1;
+  border-inline-start: 0.3rem solid #21659b;
+  border-radius: 0.35rem;
+  background: #edf6ff;
+  overflow-wrap: anywhere;
+  pointer-events: auto;
+  color: #17212b;
+}
+#developer-tools-toasts .dt-toast--warning {
+  background: #fff7db;
+  border-color: #dfbd56;
+  border-inline-start-color: #8c6500;
+}
+#developer-tools-toasts .dt-toast--alert {
+  background: #ffeded;
+  border-color: #d69191;
+  border-inline-start-color: #a12121;
+}
+#developer-tools-toasts .dt-toast:focus-visible {
+  outline: 2px solid #17212b;
+  outline-offset: -3px;
+}
+#developer-tools-toasts .dt-toast__heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+#developer-tools-toasts .dt-toast__close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin: -0.4rem -0.4rem 0 0;
+  margin-inline-start: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0.2rem;
+  background: transparent;
+  color: inherit;
+  font: 1.5rem/1 system-ui, sans-serif;
+  cursor: pointer;
+}
+#developer-tools-toasts .dt-toast__close[hidden] {
+  display: none;
+}
+#developer-tools-toasts .dt-toast__close:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+#developer-tools-toasts .dt-toast__close:focus-visible {
+  outline: 2px solid currentColor;
+}
+#developer-tools-toasts .dt-toast__content {
+  min-width: 0;
+  overflow: auto;
+}
+#developer-tools-toasts .dt-toast__content > :first-child {
+  margin-top: 0;
+}
+#developer-tools-toasts .dt-toast__content > :last-child {
+  margin-bottom: 0;
+}
+#developer-tools-toasts .dt-toast__content img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+#developer-tools-toasts .dt-toast__content pre {
+  max-width: 100%;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+#developer-tools-toasts .dt-toast__content table {
+  display: block;
+  max-width: 100%;
+  overflow: auto;
+  border-collapse: collapse;
+}
+#developer-tools-toasts .dt-toast__content th, #developer-tools-toasts .dt-toast__content td {
+  padding: 0.25rem;
+  border: 1px solid currentColor;
+}
+#developer-tools-toasts .dt-toast__content a {
+  color: #174e82;
+  text-decoration: underline;
+}
+#developer-tools-toasts .dt-toast__content blockquote {
+  margin-inline: 0;
+  padding-inline-start: 0.75rem;
+  border-inline-start: 2px solid currentColor;
+}
+#developer-tools-toasts .dt-toast__content h1, #developer-tools-toasts .dt-toast__content h2, #developer-tools-toasts .dt-toast__content h3, #developer-tools-toasts .dt-toast__content h4, #developer-tools-toasts .dt-toast__content h5, #developer-tools-toasts .dt-toast__content h6 {
+  font-size: 1.1em;
+  line-height: 1.4;
+}
+@media (max-width: 56rem), (max-height: 38rem) {
+  #developer-tools-toasts {
+    display: flex;
+    flex-direction: column;
+    left: auto;
+    width: calc(100% - 2rem);
+    max-width: 32rem;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  #developer-tools-toasts .dt-toast-region {
+    display: contents;
+  }
+}
