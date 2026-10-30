@@ -20,7 +20,7 @@
         "silverstripe/versioned": "^3",
         "clesson-de/silverstripe-dashboard": "^1",
         "clesson-de/silverstripe-hints": "^1",
-        "clesson-de/silverstripe-gridfield-pro": "^1",
+        "clesson-de/silverstripe-gridfield-pro": "^2",
         "clesson-de/silverstripe-markdown": "^1",
         "lekoala/silverstripe-encrypt": "^5",
         "guzzlehttp/guzzle": "^7",
