@@ -27,7 +27,7 @@ class MonitoringNotificationService
     /** Transport failures propagate so a task never silently claims delivery. */
     public function send(array $outcomes): void
     {
-        $recipients = MonitoringRecipients::parse((string) DeveloperToolsConfig::currentRecord()->NotificationEmails);
+        $recipients = MonitoringRecipients::resolve(DeveloperToolsConfig::currentRecord()->NotifyMembers());
         if (!$recipients) {
             return;
         }
@@ -72,7 +72,23 @@ class MonitoringNotificationService
         $status = $check ? $this->assessment($check) : [
             'Status' => _t(__CLASS__ . '.DISABLED', 'Disabled; not checked.'), 'Attention' => false, 'Unknown' => false,
         ];
+        if ($check) {
+            $status['Status'] .= $this->redirectStatus($check);
+        }
         return ['Name' => $website->Name, 'URL' => $website->BaseURL] + $status + $this->badge($status, $check !== null);
+    }
+
+    /** Includes the independent transport outcome even when the inventory fetch failed. */
+    private function redirectStatus(MonitoringCheck $check): string
+    {
+        foreach ($check->getHealthChecks() as $result) {
+            if ($result['id'] === MonitoringRedirectCheck::ID) {
+                return ' ' . _t(__CLASS__ . '.HTTP_REDIRECT', 'HTTP to HTTPS: {status}.', [
+                    'status' => HealthStatus::label($result['status']),
+                ]);
+            }
+        }
+        return '';
     }
 
     /** Text and color both communicate status for clients without images or styles. */

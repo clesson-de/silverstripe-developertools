@@ -1,3 +1,38 @@
+.toast-preview {
+  border-left: 5px solid #21659b;
+  padding-left: 0.75rem;
+  overflow-wrap: anywhere;
+
+  &--warning { border-left-color: #dfbd56; }
+  &--alert { border-left-color: #a12121; }
+
+  &__title {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+  }
+
+  &__text { white-space: pre-wrap; }
+}
+
+.toast-position {
+  display: inline-grid;
+  grid-template: repeat(3, 0.5rem) / repeat(3, 0.5rem);
+  gap: 2px;
+  vertical-align: middle;
+
+  &__cell {
+    background-color: #d3d6d9;
+    border: 1px solid #aeb4ba;
+    border-radius: 1px;
+
+    &--active {
+      background-color: #0071c4;
+      border-color: #005a9e;
+    }
+  }
+}
+
 .monitoring-details {
   padding: 1rem;
   overflow-x: auto;

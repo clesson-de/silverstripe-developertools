@@ -10,6 +10,7 @@ use Clesson\Silverstripe\DeveloperTools\Models\MonitoringCheck;
 use Clesson\Silverstripe\DeveloperTools\Models\MonitoringSnapshot;
 use Clesson\Silverstripe\DeveloperTools\Services\MonitoringCheckService;
 use Clesson\Silverstripe\DeveloperTools\Services\MonitoringHttpClient;
+use Clesson\Silverstripe\DeveloperTools\Services\MonitoringRedirectCheck;
 use Clesson\Silverstripe\DeveloperTools\Services\ReleaseVersionService;
 use Clesson\Silverstripe\DeveloperTools\Services\HealthReport;
 use Clesson\Silverstripe\DeveloperTools\Services\MonitoringNotificationService;
@@ -78,6 +79,17 @@ class MonitoringBackendTest extends SapphireTest
             self::assertNotEmpty($inventory['composer_packages']);
         });
         Injector::inst()->registerService($release, ReleaseVersionService::class);
+        $this->redirectResult('ok');
+    }
+
+    /** Never permits database integration tests to contact an HTTP endpoint. */
+    private function redirectResult(string $status): void
+    {
+        $service = $this->createMock(MonitoringRedirectCheck::class);
+        $service->method('check')->willReturn(HealthReport::singleton()->result(
+            MonitoringRedirectCheck::ID, 'HTTP to HTTPS redirect', $status, 'Synthetic redirect result.'
+        ));
+        Injector::inst()->registerService($service, MonitoringRedirectCheck::class);
     }
 
     /** Restores process-global state. */
@@ -122,7 +134,8 @@ class MonitoringBackendTest extends SapphireTest
             $check = MonitoringCheckService::create()->check($website);
             self::assertSame('unchanged', $check->Status);
             self::assertSame($first->SnapshotID, $check->SnapshotID);
-            self::assertSame($health, $check->getHealthChecks());
+            self::assertSame($health, array_values(array_filter($check->getHealthChecks(),
+                static fn(array $result): bool => $result['id'] !== MonitoringRedirectCheck::ID)));
             self::assertSame($status, $check->getHealthStatus());
         }
         self::assertSame(1, MonitoringSnapshot::get()->count());
@@ -140,7 +153,44 @@ class MonitoringBackendTest extends SapphireTest
         $check = MonitoringCheckService::create()->check($website);
         self::assertSame('failed', $check->Status);
         self::assertEmpty($check->HealthResults);
+        self::assertNotEmpty($check->HttpRedirectResult);
         self::assertSame(0, MonitoringSnapshot::get()->count());
+    }
+
+    /** Redirect warnings survive failed API requests and never alter inventory equality. */
+    public function testIndependentRedirectHistory(): void
+    {
+        $website = $this->website();
+        $this->respondWith(MonitoringInventoryTest::inventory());
+        $first = MonitoringCheckService::create()->check($website);
+        $this->redirectResult('warning');
+        $second = MonitoringCheckService::create()->check($website);
+        self::assertSame('unchanged', $second->Status);
+        self::assertSame($first->SnapshotID, $second->SnapshotID);
+        self::assertSame('warning', $second->getHealthStatus());
+        $client = $this->createMock(MonitoringHttpClient::class);
+        $client->method('fetch')->willThrowException(new UnexpectedValueException('API unavailable'));
+        Injector::inst()->registerService($client, MonitoringHttpClient::class);
+        $failed = MonitoringCheckService::create()->check($website);
+        self::assertSame('failed', $failed->Status);
+        self::assertEmpty($failed->HealthResults);
+        $reloaded = MonitoringCheck::get()->byID($failed->ID);
+        self::assertSame('warning', $reloaded->getHealthStatus());
+        self::assertSame(MonitoringRedirectCheck::ID, $reloaded->getHealthChecks()[0]['id']);
+    }
+
+    /** Remote producers cannot impersonate the independently observed redirect check. */
+    public function testReservedCentralIDIsRejected(): void
+    {
+        $this->respondWith([
+            'schema_version' => 2, 'inventory' => MonitoringInventoryTest::inventory(),
+            'health_checks' => [HealthReport::create()->result(MonitoringRedirectCheck::ID, 'Spoofed', 'ok', 'Fake')],
+        ]);
+        $check = MonitoringCheckService::create()->check($this->website());
+        self::assertSame('failed', $check->Status);
+        self::assertSame(MonitoringCheck::INVALID_INVENTORY, $check->ErrorMessage);
+        self::assertCount(1, $check->getHealthChecks());
+        self::assertSame('Synthetic redirect result.', $check->getHealthChecks()[0]['message']);
     }
 
     /** Meaningful modifications and a return to an old inventory each create snapshots. */

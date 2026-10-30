@@ -5,31 +5,42 @@ declare(strict_types=1);
 namespace Clesson\Silverstripe\DeveloperTools\Models;
 
 use Clesson\Silverstripe\Dashboard\Forms\DashboardField;
+use Clesson\Silverstripe\Hints\Forms\HintField;
 use Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet;
 use Clesson\Silverstripe\DeveloperTools\Forms\GridFieldConfig_WebsitesInConfiguration;
 use Clesson\Silverstripe\DeveloperTools\Forms\GridFieldConfig_WebsitesInInfo;
+use Clesson\Silverstripe\DeveloperTools\Forms\GridFieldConfig_ToastMessages;
+use Clesson\Silverstripe\DeveloperTools\Constants\ToastField;
+use Clesson\Silverstripe\DeveloperTools\Constants\OfflineField;
+use Clesson\Silverstripe\DeveloperTools\Forms\OfflineModeTab;
+use Clesson\Silverstripe\DeveloperTools\Services\OfflineMode;
 use Clesson\Silverstripe\DeveloperTools\Panels\ProjectInformationPanel;
 use Clesson\Silverstripe\DeveloperTools\Panels\MonitoringWebsitesPanel;
-use Clesson\Silverstripe\DeveloperTools\Helpers\MonitoringRecipients;
-use DomainException;
 use SilverStripe\Core\Validation\ValidationResult;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TabSet;
-use SilverStripe\Forms\TextareaField;
+use SilverStripe\Forms\ListboxField;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\HasManyList;
+use SilverStripe\ORM\ManyManyList;
+use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\View\Requirements;
 
 /**
- * Singleton containing the developer tools dashboard, monitoring and analysis.
+ * Singleton containing the developer tools dashboard, monitoring, overlays and offline settings.
  *
  * @property string $Title
- * @property string $NotificationEmails
+ * @property bool $OfflineActive
+ * @property string|null $OfflineStart
+ * @property string|null $OfflineEnd
+ * @property string $OfflineIPExceptions
  * @method HasManyList|MonitoredWebsite[] Websites()
+ * @method HasManyList|ToastMessage[] ToastMessages()
+ * @method ManyManyList|Member[] NotifyMembers()
  *
  * @package Clesson\Silverstripe\DeveloperTools
  * @subpackage Models
@@ -38,8 +49,8 @@ class DeveloperToolsConfig extends DataObject
 {
     /** Internal persistence field; not an editable setting. */
     public const TITLE_FIELD = 'Title';
-    /** Comma-separated summary recipients. */
-    public const NOTIFICATION_EMAILS = 'NotificationEmails';
+    /** Members receiving automatic monitoring summaries. */
+    public const NOTIFY_MEMBERS = 'NotifyMembers';
 
     /** @config */
     private static string $table_name = 'DeveloperTools_Config';
@@ -53,12 +64,21 @@ class DeveloperToolsConfig extends DataObject
     /** @config */
     private static array $db = [
         self::TITLE_FIELD => 'Varchar(100)',
-        self::NOTIFICATION_EMAILS => 'Text',
+        OfflineField::ACTIVE => 'Boolean',
+        OfflineField::START => 'Datetime',
+        OfflineField::END => 'Datetime',
+        OfflineField::IP_EXCEPTIONS => 'Text',
     ];
 
     /** @config */
     private static array $has_many = [
         'Websites' => MonitoredWebsite::class . '.Config',
+        ToastField::TOAST_MESSAGES => ToastMessage::class . '.' . ToastField::SETTINGS,
+    ];
+
+    /** @config */
+    private static array $many_many = [
+        self::NOTIFY_MEMBERS => Member::class,
     ];
 
     /**
@@ -97,22 +117,18 @@ class DeveloperToolsConfig extends DataObject
     public function validate(): ValidationResult
     {
         $result = parent::validate();
-        try {
-            MonitoringRecipients::parse((string) $this->NotificationEmails);
-        } catch (DomainException $exception) {
-            $result->addFieldError(self::NOTIFICATION_EMAILS,
-                _t(__CLASS__ . '.INVALID_EMAILS', 'Enter at most 50 valid email addresses separated by commas.'));
-        }
+        OfflineMode::create()->validate($this, $result);
         return $result;
     }
 
     /** @inheritdoc */
     public function fieldLabels($includerelations = true): array
     {
-        return array_merge(parent::fieldLabels($includerelations), [
+        return array_merge(parent::fieldLabels($includerelations), OfflineField::options(), [
             self::TITLE_FIELD => _t(__CLASS__ . '.TITLE', 'Developer Tools'),
-            self::NOTIFICATION_EMAILS => _t(__CLASS__ . '.NOTIFICATION_EMAILS', 'Email recipients'),
+            self::NOTIFY_MEMBERS => _t(__CLASS__ . '.NOTIFY_MEMBERS', 'Notification recipients'),
             'Websites' => _t(__CLASS__ . '.WEBSITES', 'Websites'),
+            ToastField::TOAST_MESSAGES => ToastField::label(ToastField::TOAST_MESSAGES),
             'ID' => _t('Clesson\Silverstripe\DeveloperTools\Common.ID', 'ID'),
             'Created' => _t('Clesson\Silverstripe\DeveloperTools\Common.CREATED', 'Created'),
             'LastEdited' => _t('Clesson\Silverstripe\DeveloperTools\Common.LAST_EDITED', 'Last edited'),
@@ -120,7 +136,7 @@ class DeveloperToolsConfig extends DataObject
     }
 
     /**
-     * Places Dashboard first, Monitoring second and Analysis last.
+     * Places Dashboard first, followed by Monitoring, Overlays, Offline mode and Analysis.
      */
     public function getCMSFields(): FieldList
     {
@@ -131,10 +147,33 @@ class DeveloperToolsConfig extends DataObject
             'Root',
             $this->buildDashboardTab(),
             $this->buildMonitoringTabSet(),
+            $this->buildToastsTab(),
+            (new OfflineModeTab())->build(),
             (new AnalysisTabSet())->build()
         );
         $fields->push($rootField);
         return $fields;
+    }
+
+    /** Edits frontend notices without exposing a separate admin route. */
+    private function buildToastsTab(): Tab
+    {
+        /** @var HintField $toastHintField */
+        $toastHintField = HintField::create(
+            'ToastHint',
+            _t(__CLASS__ . '.TOAST_HINT_TITLE', 'Website overlays'),
+            _t(__CLASS__ . '.TOAST_HINT', 'Overlays display information, warnings or alerts above the website content, for example maintenance notices or important announcements. Visibility can be restricted by environment, IP addresses, user groups (including subgroups) and an optional start/end date and time. All configured filters apply together. Position, automatic dismissal and the close button can be configured individually.')
+        );
+        /** @var GridField $toastMessagesField */
+        $toastMessagesField = GridField::create(
+            ToastField::TOAST_MESSAGES,
+            '',
+            $this->ToastMessages(),
+            GridFieldConfig_ToastMessages::create()
+        );
+        /** @var Tab $toastsTab */
+        $toastsTab = Tab::create('Toasts', ToastField::label(ToastField::TOAST_MESSAGES), $toastHintField, $toastMessagesField);
+        return $toastsTab;
     }
 
     /**
@@ -154,28 +193,39 @@ class DeveloperToolsConfig extends DataObject
     /**
      * Provides the monitoring overview and website configuration.
      */
-    private function buildMonitoringTabSet(): TabSet
+    private function buildMonitoringTabSet(): Tab
     {
         Requirements::javascript('clesson-de/silverstripe-developertools:client/admin/dist/bundle.js');
         Requirements::css('clesson-de/silverstripe-developertools:client/admin/dist/bundle.css');
         /** @var TabSet $monitoringTabSet */
         $monitoringTabSet = TabSet::create(
-            'Monitoring',
-            _t(__CLASS__ . '.TAB_MONITORING', 'Monitoring'),
+            'MonitoringTabs',
             $this->buildMonitoringTab('Info', _t(__CLASS__ . '.TAB_INFO', 'Info'), false),
             $this->buildMonitoringTab('Configuration', _t(__CLASS__ . '.TAB_CONFIGURATION', 'Configuration'), true),
             $this->buildNotificationsTab()
         );
-        return $monitoringTabSet;
+        /** @var Tab $monitoringTab */
+        $monitoringTab = Tab::create(
+            'Monitoring',
+            _t(__CLASS__ . '.TAB_MONITORING', 'Monitoring'),
+            $this->buildMonitoringHint(),
+            $monitoringTabSet
+        );
+        return $monitoringTab;
     }
 
     /** Empty recipients disable automatic run summaries without affecting manual checks. */
     private function buildNotificationsTab(): Tab
     {
-        $field = TextareaField::create(self::NOTIFICATION_EMAILS, $this->fieldLabel(self::NOTIFICATION_EMAILS));
-        $field->setRows(3)->setDescription(_t(__CLASS__ . '.NOTIFICATION_HELP',
-            'Comma-separated addresses. One summary per automatic run; no emails for manual checks. Leave empty to disable.'));
-        return Tab::create('Notifications', _t(__CLASS__ . '.TAB_NOTIFICATIONS', 'Notifications'), $field);
+        /** @var ListboxField $notifyMembersField */
+        $notifyMembersField = ListboxField::create(
+            self::NOTIFY_MEMBERS,
+            $this->fieldLabel(self::NOTIFY_MEMBERS),
+            Member::get()->map('ID', 'Name')->toArray()
+        );
+        $notifyMembersField->setDescription(_t(__CLASS__ . '.NOTIFICATION_HELP',
+            'Select members to receive one summary per automatic run at their current email address. No emails for manual checks. Leave empty to disable. Selection does not grant CMS permissions.'));
+        return Tab::create('Notifications', _t(__CLASS__ . '.TAB_NOTIFICATIONS', 'Notifications'), $notifyMembersField);
     }
 
     /**
@@ -199,6 +249,16 @@ class DeveloperToolsConfig extends DataObject
         /** @var Tab $monitoringTab */
         $monitoringTab = Tab::create($name, $title, $websitesField);
         return $monitoringTab;
+    }
+
+    /** Explains the monitoring workflow above the shared monitoring tabset. */
+    private function buildMonitoringHint(): HintField
+    {
+        return HintField::create(
+            'MonitoringHint',
+            _t(__CLASS__ . '.MONITORING_HINT_TITLE', 'Website monitoring'),
+            _t(__CLASS__ . '.MONITORING_HINT', 'Monitoring provides an overview of your websites, their availability, software versions and health checks. It also checks whether HTTP redirects directly to HTTPS; unreachable HTTP endpoints are marked as not assessable. Manage monitored websites under Configuration, review results under Info and configure email summaries under Notifications.')
+        );
     }
 
     /**

@@ -160,6 +160,9 @@ class MonitoringCheckService
     private function attempt(MonitoredWebsite $website): MonitoringCheck
     {
         $check = $this->newAttempt($website);
+        $check->HttpRedirectResult = json_encode(
+            [MonitoringRedirectCheck::singleton()->check((string) $website->BaseURL)], JSON_THROW_ON_ERROR
+        );
         try {
             $snapshot = $this->fetchSnapshot($website, $check);
             $check->SnapshotID = $snapshot->ID;
@@ -191,6 +194,9 @@ class MonitoringCheckService
         $token = (string) $website->ApiToken;
         $body = MonitoringHttpClient::singleton()->fetch((string) $website->BaseURL, $token);
         $response = MonitoringResponse::singleton()->decode($body);
+        if (in_array(MonitoringRedirectCheck::ID, array_column($response['health_checks'], 'id'), true)) {
+            throw new DomainException('Remote report contains a reserved central check ID.');
+        }
         if ($this->containsCredential($response, $token)) {
             throw new DomainException('Inventory contains the request credential.');
         }

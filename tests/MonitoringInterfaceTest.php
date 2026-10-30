@@ -16,6 +16,7 @@ use Clesson\Silverstripe\DeveloperTools\Services\ReleaseVersionService;
 use Clesson\Silverstripe\DeveloperTools\Services\HealthCheckService;
 use Clesson\Silverstripe\DeveloperTools\Services\HealthReport;
 use Clesson\Silverstripe\DeveloperTools\Services\MonitoringNotificationService;
+use Clesson\Silverstripe\DeveloperTools\Services\MonitoringRedirectCheck;
 use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\FunctionalTest;
@@ -116,6 +117,31 @@ class MonitoringInterfaceTest extends FunctionalTest
         self::assertStringContainsString(MonitoringCheck::FETCH_FAILED, $data['html']);
         self::assertStringNotContainsString($site->ApiToken, $response->getBody());
         self::assertStringContainsString('no-store', $response->getHeader('Cache-Control'));
+    }
+
+    /** An API failure never hides the separately observed redirect warning in details or history. */
+    public function testRedirectWarningIsVisibleAfterInventoryFailure(): void
+    {
+        $site = $this->website();
+        $check = MonitoringCheck::create([
+            'WebsiteID' => $site->ID, 'StartedAt' => '2026-01-01 12:00:00',
+            'FinishedAt' => '2026-01-01 12:00:01', 'Status' => 'failed',
+            'ErrorMessage' => MonitoringCheck::FETCH_FAILED,
+            'HttpRedirectResult' => json_encode([HealthReport::create()->result(
+                MonitoringRedirectCheck::ID, 'HTTP to HTTPS redirect', 'warning', 'No direct HTTPS redirect.'
+            )]),
+        ]);
+        $check->write();
+        $site->LastError = MonitoringCheck::FETCH_FAILED;
+        $site->write();
+        $this->logInWithPermission('ADMIN');
+        $html = MonitoringTableRenderer::create()->render($site);
+        self::assertStringContainsString(MonitoringCheck::FETCH_FAILED, $html);
+        self::assertStringContainsString('No direct HTTPS redirect.', $html);
+        self::assertStringContainsString('Healthchecks: Warning', MonitoringTableRenderer::create()->renderActionRequired($site));
+        $history = (string) $check->getCMSFields()->fieldByName('Root.Main.HealthChecks')->getContent();
+        self::assertStringContainsString('No direct HTTPS redirect.', $history);
+        self::assertStringContainsString('HTTP to HTTPS redirect', $history);
     }
 
     /** Renders all inventory item types in a four-column non-GridField table. */

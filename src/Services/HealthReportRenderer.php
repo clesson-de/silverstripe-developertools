@@ -22,7 +22,7 @@ class HealthReportRenderer
     public function render(array $report): string
     {
         $rows = [];
-        foreach (HealthReport::singleton()->normalize($report) as $row) {
+        foreach (HealthReport::singleton()->normalize($report, true) as $row) {
             $rows[] = $row + ['label' => HealthStatus::label($row['status'])];
         }
         return (string) ArrayData::create([

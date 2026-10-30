@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Clesson\Silverstripe\DeveloperTools\Tests;
 
 use Clesson\Silverstripe\Dashboard\Forms\DashboardField;
+use Clesson\Silverstripe\Hints\Forms\HintField;
 use Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin;
 use Clesson\Silverstripe\DeveloperTools\Models\DeveloperToolsConfig;
+use Clesson\Silverstripe\DeveloperTools\Models\ToastMessage;
 use Clesson\Silverstripe\DeveloperTools\Panels\ProjectInformationPanel;
 use Clesson\Silverstripe\DeveloperTools\Panels\MonitoringWebsitesPanel;
 use Clesson\Silverstripe\DeveloperTools\Services\ProjectInformationService;
@@ -14,6 +16,7 @@ use Clesson\Silverstripe\DeveloperTools\Services\HealthCheckService;
 use SilverStripe\Admin\SingleRecordAdmin;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\FunctionalTest;
+use SilverStripe\Forms\ListboxField;
 
 /**
  * Covers singleton persistence, CMS tab structure and dashboard authorization.
@@ -55,9 +58,27 @@ class DeveloperToolsConfigTest extends FunctionalTest
     {
         $this->mockVersions();
         $fields = DeveloperToolsConfig::currentRecord()->getCMSFields();
-        self::assertSame(['Main', 'Monitoring', 'Analysis'], $fields->fieldByName('Root')->getChildren()->column('Name'));
-        self::assertSame(['Info', 'Configuration', 'Notifications'], $fields->fieldByName('Root.Monitoring')->getChildren()->column('Name'));
-        self::assertNotNull($fields->dataFieldByName(DeveloperToolsConfig::NOTIFICATION_EMAILS));
+        self::assertSame(['Main', 'Monitoring', 'Toasts', 'Offline', 'Analysis'], $fields->fieldByName('Root')->getChildren()->column('Name'));
+        self::assertSame(['OfflineHint', 'OfflineActive', 'OfflineStart', 'OfflineEnd', 'OfflineIPExceptions'],
+            $fields->fieldByName('Root.Offline')->getChildren()->column('Name'));
+        $monitoringFields = $fields->fieldByName('Root.Monitoring')->getChildren();
+        self::assertSame(['MonitoringHint', 'MonitoringTabs'], $monitoringFields->column('Name'));
+        self::assertInstanceOf(HintField::class, $monitoringFields->first());
+        self::assertStringContainsString('Monitoring provides an overview', (string) $monitoringFields->first()->getContent());
+        self::assertSame(['Info', 'Configuration', 'Notifications'],
+            $fields->fieldByName('Root.Monitoring.MonitoringTabs')->getChildren()->column('Name'));
+        self::assertInstanceOf(ListboxField::class, $fields->dataFieldByName(DeveloperToolsConfig::NOTIFY_MEMBERS));
+        self::assertNull($fields->dataFieldByName('NotificationEmails'));
+        $toastFields = $fields->fieldByName('Root.Toasts')->getChildren();
+        self::assertSame('Overlays', $fields->fieldByName('Root.Toasts')->Title());
+        self::assertSame('Overlay', ToastMessage::singleton()->i18n_singular_name());
+        self::assertSame('Overlays', ToastMessage::singleton()->i18n_plural_name());
+        self::assertSame(['ToastHint', 'ToastMessages'], $toastFields->column('Name'));
+        self::assertInstanceOf(HintField::class, $toastFields->first());
+        self::assertStringContainsString('maintenance notices', (string) $toastFields->first()->getContent());
+        foreach (['environment', 'IP addresses', 'user groups', 'subgroups', 'start/end date and time'] as $filter) {
+            self::assertStringContainsString($filter, (string) $toastFields->first()->getContent());
+        }
         self::assertSame(
             ['ProjectInformation', 'ComposerPackages', 'Routes'],
             $fields->fieldByName('Root.Analysis')->getChildren()->column('Name')

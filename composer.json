@@ -15,7 +15,13 @@
         "php": "^8.5",
         "silverstripe/framework": "^6",
         "silverstripe/admin": "^3",
+        "silverstripe/cms": "^6",
+        "silverstripe/assets": "^3",
+        "silverstripe/versioned": "^3",
         "clesson-de/silverstripe-dashboard": "^1",
+        "clesson-de/silverstripe-hints": "^1",
+        "clesson-de/silverstripe-gridfield-pro": "^1",
+        "clesson-de/silverstripe-markdown": "^1",
         "lekoala/silverstripe-encrypt": "^5",
         "guzzlehttp/guzzle": "^7",
         "composer/semver": "^3",
@@ -28,7 +34,7 @@
         }
     },
     "extra": {
-        "expose": ["client/admin/dist"]
+        "expose": ["client/admin/dist", "client/frontend/dist"]
     },
     "prefer-stable": true,
     "minimum-stability": "dev"

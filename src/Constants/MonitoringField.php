@@ -66,6 +66,8 @@ final class MonitoringField
     public const HEALTH_RESULTS = 'HealthResults';
     /** Aggregate per-attempt health outcome. */
     public const HEALTH_STATUS = 'HealthStatus';
+    /** Independently collected central HTTP redirect outcome. */
+    public const HTTP_REDIRECT_RESULT = 'HttpRedirectResult';
 
     /** Returns translated labels for model fields and relations. */
     public static function options(): array
@@ -73,6 +75,7 @@ final class MonitoringField
         return self::configurationLabels() + self::historyLabels() + [
             self::HEALTH_RESULTS => _t(__CLASS__ . '.HEALTH_RESULTS', 'Health results JSON'),
             self::HEALTH_STATUS => _t(__CLASS__ . '.HEALTH_STATUS', 'System health'),
+            self::HTTP_REDIRECT_RESULT => _t(__CLASS__ . '.HTTP_REDIRECT_RESULT', 'HTTP redirect result JSON'),
         ];
     }
 

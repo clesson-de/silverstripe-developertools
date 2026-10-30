@@ -6,30 +6,33 @@ namespace Clesson\Silverstripe\DeveloperTools\Helpers;
 
 use DomainException;
 use SilverStripe\Control\Email\Email;
+use SilverStripe\Security\Member;
 
 /**
- * Parses the shared comma-separated notification recipients without dropping errors.
+ * Resolves current member email addresses without silently dropping invalid recipients.
  *
  * @package Clesson\Silverstripe\DeveloperTools
  * @subpackage Helpers
  */
 class MonitoringRecipients
 {
-    /** Allows an empty list to disable notifications; rejects malformed addresses. */
-    public static function parse(string $value): array
+    /**
+     * Deduplicates addresses and fails explicitly if a selected member has no valid email.
+     *
+     * @param iterable<Member> $members
+     * @return string[]
+     */
+    public static function resolve(iterable $members): array
     {
-        if (trim($value) === '') {
-            return [];
-        }
-        $addresses = array_map('trim', explode(',', $value));
-        if (count($addresses) > 50 || strlen($value) > 10000) {
-            throw new DomainException('Invalid notification recipients.');
-        }
-        foreach ($addresses as $address) {
+        $addresses = [];
+        foreach ($members as $member) {
+            $address = trim((string) $member->Email);
             if (preg_match('/[\r\n]/', $address) || !Email::is_valid_address($address)) {
-                throw new DomainException('Invalid notification recipients.');
+                throw new DomainException(_t(__CLASS__ . '.INVALID_MEMBER_EMAIL',
+                    'Monitoring recipient member #{id} has no valid email address.', ['id' => $member->ID]));
             }
+            $addresses[strtolower($address)] = $address;
         }
-        return array_values(array_unique($addresses));
+        return array_values($addresses);
     }
 }

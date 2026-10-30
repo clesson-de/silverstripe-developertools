@@ -11,6 +11,7 @@ use Clesson\Silverstripe\DeveloperTools\Models\MonitoringCheck;
 use Clesson\Silverstripe\DeveloperTools\Models\MonitoringSnapshot;
 use Clesson\Silverstripe\DeveloperTools\Services\HealthReport;
 use Clesson\Silverstripe\DeveloperTools\Services\MonitoringNotificationService;
+use Clesson\Silverstripe\DeveloperTools\Services\MonitoringRedirectCheck;
 use Clesson\Silverstripe\DeveloperTools\Services\ReleaseVersionService;
 use DomainException;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -19,6 +20,8 @@ use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
+use SilverStripe\Security\Member;
+use SilverStripe\Security\Permission;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Exception\TransportException;
 
@@ -32,15 +35,17 @@ class MonitoringNotificationTest extends SapphireTest
 {
     protected $usesDatabase = true;
 
-    /** Uses a deterministic sender and two deduplicated recipients. */
+    /** Uses a deterministic sender and two linked member recipients. */
     protected function setUp(): void
     {
         parent::setUp();
         Config::modify()->set(Email::class, 'admin_email', 'monitor@example.org');
         Config::modify()->set(Director::class, 'alternate_base_url', 'https://monitoring.example.net/');
         $config = DeveloperToolsConfig::currentRecord();
-        $config->NotificationEmails = 'one@example.org, two@example.org, one@example.org';
-        $config->write();
+        $config->NotifyMembers()->setByIDList([
+            $this->createRecipient('one@example.org')->ID,
+            $this->createRecipient('two@example.org')->ID,
+        ]);
     }
 
     /** Mail contains all run outcomes, safely escaped, with no inventory or raw health text. */
@@ -95,12 +100,39 @@ class MonitoringNotificationTest extends SapphireTest
         ];
     }
 
+    /** Central redirect results affect subjects and remain visible even after an API failure. */
+    #[DataProvider('redirectStates')]
+    public function testRedirectSummary(string $fetchStatus, string $redirectStatus, string $subject): void
+    {
+        $release = $this->createMock(ReleaseVersionService::class);
+        $release->method('actionRequired')->willReturn(false);
+        Injector::inst()->registerService($release, ReleaseVersionService::class);
+        $outcome = $this->outcome('HTTP project', $fetchStatus);
+        $outcome['check']->HttpRedirectResult = json_encode([HealthReport::create()->result(
+            MonitoringRedirectCheck::ID, 'HTTP to HTTPS redirect', $redirectStatus, 'Synthetic result.'
+        )]);
+        MonitoringNotificationService::create()->send([$outcome]);
+        $mail = self::findEmail('one@example.org,two@example.org');
+        self::assertSame($subject, $mail['Subject']);
+        self::assertStringContainsString('HTTP to HTTPS:', $mail['Content']);
+        self::assertStringNotContainsString('Synthetic result.', $mail['Content']);
+    }
+
+    /** Includes warning, unassessable and independent successful redirect observations. */
+    public static function redirectStates(): array
+    {
+        return [
+            ['unchanged', 'warning', 'Monitoring: action required for 1 project(s)'],
+            ['unchanged', 'unknown', 'Monitoring: assessment incomplete for 1 project(s)'],
+            ['failed', 'ok', 'Monitoring: action required for 1 project(s)'],
+        ];
+    }
+
     /** Empty configuration disables delivery, not the check itself. */
     public function testDisabledNotifications(): void
     {
         $config = DeveloperToolsConfig::currentRecord();
-        $config->NotificationEmails = '';
-        $config->write();
+        $config->NotifyMembers()->removeAll();
         MonitoringNotificationService::create()->send([]);
         self::assertNull(self::findEmail('one@example.org,two@example.org'));
     }
@@ -115,24 +147,76 @@ class MonitoringNotificationTest extends SapphireTest
         MonitoringNotificationService::create()->send([]);
     }
 
-    /** CMS rejects malformed comma lists instead of silently discarding recipients. */
+    /** Selected members with invalid addresses fail delivery visibly. */
     #[DataProvider('invalidRecipients')]
     public function testInvalidRecipients(string $recipients): void
     {
         $config = DeveloperToolsConfig::currentRecord();
-        $config->NotificationEmails = $recipients;
-        self::assertFalse($config->validate()->isValid());
+        $member = $config->NotifyMembers()->first();
+        $member->Email = $recipients;
+        $member->write(skipValidation: true);
         $this->expectException(DomainException::class);
-        MonitoringRecipients::parse($recipients);
+        MonitoringNotificationService::create()->send([]);
     }
 
-    /** Includes trailing commas, line injection and count limits. */
+    /** Includes missing addresses, malformed addresses and header injection. */
     public static function invalidRecipients(): array
     {
         return [
-            ['invalid'], ['valid@example.org,'], ['one@example.org;two@example.org'],
-            ["one@example.org\r\nBcc: two@example.org"], [str_repeat('one@example.org,', 50) . 'last@example.org'],
+            [''], ['invalid'], ['valid@example.org,'], ['one@example.org;two@example.org'],
+            ["one@example.org\r\nBcc: two@example.org"],
         ];
+    }
+
+    /** Resolves duplicate addresses only once, including case variants. */
+    public function testDuplicateAddresses(): void
+    {
+        self::assertSame(['one@example.org'], MonitoringRecipients::resolve([
+            Member::create(['Email' => 'ONE@example.org']),
+            Member::create(['Email' => 'one@example.org']),
+        ]));
+    }
+
+    /** Uses changed member addresses without granting any permissions. */
+    public function testMemberEmailChanges(): void
+    {
+        $member = DeveloperToolsConfig::currentRecord()->NotifyMembers()->first();
+        self::assertFalse((bool) Permission::checkMember($member, 'ADMIN'));
+        $member->Email = 'updated@example.org';
+        $member->write();
+        MonitoringNotificationService::create()->send([]);
+        self::assertEmailSent('updated@example.org,two@example.org');
+        self::assertNull(self::findEmail('one@example.org,two@example.org'));
+    }
+
+    /** CMS selection persists the relation and supports removing all recipients. */
+    public function testMemberSelectionPersistence(): void
+    {
+        $config = DeveloperToolsConfig::currentRecord();
+        $member = $this->createRecipient('selected@example.org');
+        $field = $config->getCMSFields()->dataFieldByName(DeveloperToolsConfig::NOTIFY_MEMBERS);
+        $field->setValue([$member->ID]);
+        $field->saveInto($config);
+        self::assertSame([$member->ID], $config->NotifyMembers()->column('ID'));
+        $field->setValue([]);
+        $field->saveInto($config);
+        self::assertFalse($config->NotifyMembers()->exists());
+    }
+
+    /** Deleted members no longer receive notifications. */
+    public function testDeletedMember(): void
+    {
+        DeveloperToolsConfig::currentRecord()->NotifyMembers()->first()->delete();
+        MonitoringNotificationService::create()->send([]);
+        self::assertEmailSent('two@example.org');
+    }
+
+    /** Creates ordinary members without assigning CMS access. */
+    private function createRecipient(string $email): Member
+    {
+        $member = Member::create(['FirstName' => $email, 'Email' => $email]);
+        $member->write();
+        return $member;
     }
 
     /** Builds in-memory attempts; no customer requests or real credentials. */

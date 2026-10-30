@@ -26,9 +26,10 @@ class HealthReport
     private const FIELDS = ['id', 'title', 'status', 'message', 'checked_at'];
 
     /** Rejects malformed results and duplicate IDs; order does not matter. */
-    public function normalize(mixed $results): array
+    public function normalize(mixed $results, bool $withCentralCheck = false): array
     {
-        if (!is_array($results) || !array_is_list($results) || count($results) > self::MAX_CHECKS) {
+        $limit = self::MAX_CHECKS + ($withCentralCheck ? 1 : 0);
+        if (!is_array($results) || !array_is_list($results) || count($results) > $limit) {
             throw new DomainException('Invalid health report.');
         }
         $sorted = [];

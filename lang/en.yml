@@ -1,5 +1,94 @@
 en:
+  Clesson\Silverstripe\DeveloperTools\Helpers\MonitoringRecipients:
+    INVALID_MEMBER_EMAIL: 'Monitoring recipient member #{id} has no valid email address.'
+  Clesson\Silverstripe\DeveloperTools\Middleware\OfflineMiddleware:
+    UNAVAILABLE: 'Service temporarily unavailable'
+  Clesson\Silverstripe\DeveloperTools\Models\OfflinePage:
+    SINGULARNAME: 'Offline page'
+    PLURALNAME: 'Offline pages'
+    CLASS_DESCRIPTION: 'Standalone static page for website maintenance'
+    UNIQUE: 'Only one offline page may exist.'
+    PUBLIC_ONLY: 'The offline page must be viewable by anyone because its static export is public.'
+  Clesson\Silverstripe\DeveloperTools\Constants\OfflineField:
+    ACTIVE: 'Enable offline mode'
+    START: 'Start date and time'
+    END: 'End date and time'
+    IP_EXCEPTIONS: 'IP exceptions'
+  Clesson\Silverstripe\DeveloperTools\Services\OfflineMode:
+    INVALID_IP: 'Enter valid IPv4/IPv6 addresses, CIDR networks or address ranges.'
+    INVALID_DATES: 'The end must be later than the start.'
+    MISSING_PAGE: 'Create and publish an unrestricted offline page with a successful static export before enabling offline mode.'
+  Clesson\Silverstripe\DeveloperTools\Forms\OfflineModeTab:
+    TITLE: 'Offline mode'
+    IP_HELP: 'These addresses retain access to the normal website. Separate entries with commas or new lines. Examples: 192.0.2.1, 192.0.2.0/24, 2001:db8::/32, 192.0.2.10-192.0.2.20.'
+    HINT: 'Database builds create and publish the single Offline page with English starter content if none exists. Edit it in the page tree and publish changes to refresh its standalone static HTML. Enabling offline mode serves this document with HTTP 503 at the requested URL, including APIs and monitoring. Start and end are optional; start is inclusive and end exclusive. Only the listed IP addresses bypass the gate, including for logged-in administrators. The admin area, login and required resources remain reachable. Purge or bypass existing website/CDN caches when enabling this feature. PHP, Silverstripe and the settings database must remain operational.'
+  Clesson\Silverstripe\DeveloperTools\Services\MonitoringRedirectCheck:
+    TITLE: 'HTTP to HTTPS redirect'
+    OK: 'HTTP redirects directly to HTTPS.'
+    WARNING: 'HTTP does not redirect directly to a valid HTTPS URL.'
+    UNKNOWN: 'HTTP could not be checked: the destination was rejected or no complete response was received.'
+  Clesson\Silverstripe\DeveloperTools\Forms\GridFieldConfig_ToastMessages:
+    IP_FILTER_SET: 'IP filter configured'
+    GROUP_FILTER_SET: 'User group filter configured'
+    TIME_FILTER_SET: 'Time filter configured'
+    DEV: 'Dev'
+    LIVE: 'Live'
+  Clesson\Silverstripe\DeveloperTools\Constants\ToastField:
+    TITLE: 'Title'
+    TYPE: 'Type'
+    ENVIRONMENT: 'Environment'
+    IP_RANGES: 'IP addresses and ranges'
+    MESSAGE: 'Message'
+    AUTO_HIDE_SECONDS: 'Autohide after (seconds)'
+    REMOVABLE: 'Visitors can dismiss the message using a close button'
+    HORIZONTAL_POSITION: 'Horizontal position'
+    VERTICAL_POSITION: 'Vertical position'
+    POSITION: 'Position'
+    ACTIVE: 'Active'
+    START_DATE: 'Start date and time'
+    END_DATE: 'End date and time'
+    GROUPS: 'User groups'
+    FILTERS: 'Filters'
+    SETTINGS: 'Configuration'
+    TOAST_MESSAGES: 'Overlays'
+    PREVIEW: 'Message'
+  Clesson\Silverstripe\DeveloperTools\Constants\ToastType:
+    INFO: 'Info'
+    WARNING: 'Warning'
+    ALERT: 'Alert'
+  Clesson\Silverstripe\DeveloperTools\Constants\ToastEnvironment:
+    ALL: 'All environments'
+    DEV: 'Development only'
+    LIVE: 'Live only'
+  Clesson\Silverstripe\DeveloperTools\Constants\ToastHorizontalPosition:
+    LEFT: 'Left'
+    CENTER: 'Centre'
+    RIGHT: 'Right'
+  Clesson\Silverstripe\DeveloperTools\Constants\ToastVerticalPosition:
+    TOP: 'Top'
+    CENTER: 'Centre'
+    BOTTOM: 'Bottom'
+  Clesson\Silverstripe\DeveloperTools\Models\ToastMessage:
+    TAB_CONTENT: 'Content'
+    TAB_APPEARANCE: 'Appearance'
+    TAB_FILTERS: 'Filters'
+    SINGULARNAME: 'Overlay'
+    PLURALNAME: 'Overlays'
+    GROUPS_HELP: 'Leave empty for everyone. Otherwise, only signed-in members of at least one selected group (including subgroups) can see the message. Other filters still apply.'
+    INVALID_PERIOD: 'The end date must not be before the start date.'
+    START_DATE_HELP: 'Optional. Leave empty to display immediately when active.'
+    END_DATE_HELP: 'Optional. The message is hidden from this time onward. Leave empty for no end date.'
+    TITLE_HELP: 'Optional plain text. HTML and Markdown are not rendered.'
+    INVALID_CHOICE: 'Select a valid option.'
+    INVALID_DURATION: 'Enter whole seconds between 0 and 2147483647.'
+    INVALID_IP_RANGES: 'Enter valid IPv4/IPv6 addresses, CIDR networks or ordered start-end ranges.'
+    DURATION_HELP: 'Seconds until automatic dismissal. 0 keeps the message visible.'
+    IP_HELP: 'Leave empty for everyone. Separate IPv4/IPv6 addresses, CIDR networks or start-end ranges with commas or new lines.'
+  Clesson\Silverstripe\DeveloperTools\Services\ToastRenderer:
+    CLOSE: 'Close message'
+    REGION: 'Website notices'
   Clesson\Silverstripe\DeveloperTools\Services\MonitoringNotificationService:
+    HTTP_REDIRECT: 'HTTP to HTTPS: {status}.'
     HEADING: 'Website Monitoring'
     INTRO: 'The automatic monitoring run has completed. Here is the current project overview.'
     AUTOMATIC_NOTICE: 'This message was sent automatically. Replies to this message cannot be processed. Please do not reply.'
@@ -73,10 +162,13 @@ en:
     SILVERSTRIPE_VERSION: 'Silverstripe framework version'
     DATABASE_VERSION: 'Database server version'
   Clesson\Silverstripe\DeveloperTools\Models\DeveloperToolsConfig:
+    MONITORING_HINT_TITLE: 'Website monitoring'
+    MONITORING_HINT: 'Monitoring provides an overview of your websites, their availability, software versions and health checks. It also checks whether HTTP redirects directly to HTTPS; unreachable HTTP endpoints are marked as not assessable. Manage monitored websites under Configuration, review results under Info and configure email summaries under Notifications.'
+    TOAST_HINT_TITLE: 'Website overlays'
+    TOAST_HINT: 'Overlays display information, warnings or alerts above the website content, for example maintenance notices or important announcements. Visibility can be restricted by environment, IP addresses, user groups (including subgroups) and an optional start/end date and time. All configured filters apply together. Position, automatic dismissal and the close button can be configured individually.'
     TAB_NOTIFICATIONS: 'Notifications'
-    NOTIFICATION_EMAILS: 'Email recipients'
-    NOTIFICATION_HELP: 'Comma-separated addresses. One summary per automatic run; no emails for manual checks. Leave empty to disable.'
-    INVALID_EMAILS: 'Enter at most 50 valid email addresses separated by commas.'
+    NOTIFY_MEMBERS: 'Notification recipients'
+    NOTIFICATION_HELP: 'Select members to receive one summary per automatic run at their current email address. No emails for manual checks. Leave empty to disable. Selection does not grant CMS permissions.'
     SINGULARNAME: 'Developer Tools Configuration'
     PLURALNAME: 'Developer Tools Configurations'
     TITLE: 'Developer Tools'
@@ -110,7 +202,7 @@ en:
   Clesson\Silverstripe\DeveloperTools\Forms\GridField\GridFieldAction_ToggleActive:
     ENABLED: 'Enabled'
     DISABLED: 'Disabled'
-    NOT_FOUND: 'Website not found.'
+    NOT_FOUND: 'Record not found.'
     ACCESS_DENIED: 'Access denied.'
   Clesson\Silverstripe\DeveloperTools\Services\ReleaseVersionService:
     DATABASE: 'Database'
@@ -127,6 +219,7 @@ en:
     LATEST: 'Latest stable version'
     STATUS: 'Status'
   Clesson\Silverstripe\DeveloperTools\Constants\MonitoringField:
+    HTTP_REDIRECT_RESULT: 'HTTP redirect result JSON'
     HEALTH_RESULTS: 'Health results JSON'
     HEALTH_STATUS: 'System health'
     NAME: 'Name'

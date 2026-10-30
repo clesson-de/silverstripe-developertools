@@ -9,6 +9,7 @@ use Clesson\Silverstripe\DeveloperTools\Constants\MonitoringStatus;
 use Clesson\Silverstripe\DeveloperTools\Constants\HealthStatus;
 use Clesson\Silverstripe\DeveloperTools\Services\HealthReport;
 use Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer;
+use Clesson\Silverstripe\DeveloperTools\Services\MonitoringRedirectCheck;
 use DomainException;
 use JsonException;
 use LogicException;
@@ -26,6 +27,7 @@ use SilverStripe\Security\Permission;
  * @property string $Status
  * @property string $ErrorMessage
  * @property string $HealthResults
+ * @property string $HttpRedirectResult
  * @property-read array $HealthChecks
  * @property-read string $HealthStatus
  * @property int $WebsiteID
@@ -66,6 +68,7 @@ class MonitoringCheck extends DataObject
         F::STATUS => 'Varchar(12)',
         F::ERROR_MESSAGE => 'Text',
         F::HEALTH_RESULTS => 'Text',
+        F::HTTP_REDIRECT_RESULT => 'Text',
     ];
     /** @config */
     private static array $has_one = [
@@ -106,14 +109,28 @@ class MonitoringCheck extends DataObject
         parent::onBeforeWrite();
     }
 
-    /** Reads bounded validated health outcomes; legacy or failed attempts have none. */
+    /** Combines separately persisted remote and central observations, including API failures. */
     public function getHealthChecks(): array
     {
-        if (!$this->HealthResults) {
+        $results = $this->decodeHealthResults((string) $this->HealthResults);
+        if ($this->HttpRedirectResult) {
+            $central = $this->decodeHealthResults((string) $this->HttpRedirectResult);
+            if (count($central) !== 1 || $central[0]['id'] !== MonitoringRedirectCheck::ID) {
+                throw new DomainException('Invalid saved HTTP redirect result.');
+            }
+            $results = array_merge($results, $central);
+        }
+        return HealthReport::singleton()->normalize($results, true);
+    }
+
+    /** Retains the remote report limit and treats absent legacy fields as unobserved. */
+    private function decodeHealthResults(string $json): array
+    {
+        if ($json === '') {
             return [];
         }
         try {
-            $results = json_decode($this->HealthResults, true, 16, JSON_THROW_ON_ERROR);
+            $results = json_decode($json, true, 16, JSON_THROW_ON_ERROR);
         } catch (JsonException $exception) {
             throw new DomainException('Invalid saved health report.');
         }
@@ -152,6 +169,7 @@ class MonitoringCheck extends DataObject
     public function getCMSFields(): FieldList
     {
         $fields = parent::getCMSFields()->makeReadonly();
+        $fields->removeByName(F::HTTP_REDIRECT_RESULT);
         $fields->dataFieldByName(F::STATUS)?->setValue(MonitoringStatus::label($this->Status));
         $fields->dataFieldByName(F::ERROR_MESSAGE)?->setValue(self::errorLabel((string) $this->ErrorMessage));
         $fields->addFieldToTab('Root.Main', LiteralField::create('HealthChecks',
