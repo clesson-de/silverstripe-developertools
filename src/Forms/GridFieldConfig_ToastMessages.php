@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Clesson\Silverstripe\DeveloperTools\Forms;
 
+use Clesson\Silverstripe\Constants\GridFieldToolbarLayout;
 use Clesson\Silverstripe\DeveloperTools\Constants\ToastEnvironment;
 use Clesson\Silverstripe\DeveloperTools\Constants\ToastField as F;
 use Clesson\Silverstripe\DeveloperTools\Constants\ToastHorizontalPosition;
@@ -11,6 +12,10 @@ use Clesson\Silverstripe\DeveloperTools\Constants\ToastVerticalPosition;
 use Clesson\Silverstripe\DeveloperTools\Forms\GridField\GridFieldAction_ToggleActive;
 use Clesson\Silverstripe\DeveloperTools\Models\ToastMessage;
 use Clesson\Silverstripe\Forms\GridField\GridFieldRecordDates;
+use Clesson\Silverstripe\Forms\GridField\GridFieldSearch;
+use Clesson\Silverstripe\Forms\GridField\GridFieldToolbar;
+use SilverStripe\Forms\GridField\GridFieldAddNewButton;
+use SilverStripe\Forms\GridField\GridFieldFilterHeader;
 use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
 use SilverStripe\Forms\GridField\GridFieldDataColumns;
 use SilverStripe\Forms\GridField\GridFieldLazyLoader;
@@ -31,12 +36,27 @@ class GridFieldConfig_ToastMessages extends GridFieldConfig_RecordEditor
     public function __construct()
     {
         parent::__construct(20);
+        $this->removeComponentsByType(GridFieldFilterHeader::class);
+        $this->addToolbar();
         $this->addComponent(GridFieldLazyLoader::create());
         $this->addComponent(GridFieldRecordDates::create(), GridFieldEditButton::class);
         $this->addComponent(GridFieldAction_ToggleActive::create(GridFieldRecordDates::COLUMN, true), GridFieldEditButton::class);
         $this->getComponentByType(GridFieldDataColumns::class)->setDisplayFields($this->columns());
         $header = $this->getComponentByType(GridFieldSortableHeader::class);
         $header->setFieldSorting(array_merge($header->getFieldSorting(), [GridFieldRecordDates::COLUMN => 'LastEdited']));
+    }
+
+    /** Replaces column filters with a compact title/message search and a right-aligned creation action. */
+    private function addToolbar(): void
+    {
+        $toolbar = GridFieldToolbar::install($this);
+        $search = $toolbar->addItem('search', GridFieldToolbarLayout::LEFT, GridFieldToolbarLayout::CONTENT);
+        $this->addComponent(
+            GridFieldSearch::create([F::TITLE, F::MESSAGE_PLAIN], $search->getFragment()),
+            GridFieldDataColumns::class
+        );
+        $this->removeComponentsByType(GridFieldAddNewButton::class);
+        $this->addComponent(GridFieldAddNewButton::create('buttons-before-right'));
     }
 
     /** Uses safe typed output, leaving timestamps to the combined date component. */

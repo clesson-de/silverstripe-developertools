@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Clesson\Silverstripe\DeveloperTools\Forms;
 
+use Clesson\Silverstripe\Constants\GridFieldToolbarLayout;
+use Clesson\Silverstripe\DeveloperTools\Constants\MonitoringField;
+use Clesson\Silverstripe\Forms\GridField\GridFieldSearch;
+use Clesson\Silverstripe\Forms\GridField\GridFieldToolbar;
 use Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin;
 use Clesson\Silverstripe\DeveloperTools\Constants\MonitoringStatus;
 use Clesson\Silverstripe\DeveloperTools\Models\MonitoredWebsite;
@@ -27,10 +31,21 @@ class GridFieldConfig_WebsitesInInfo extends GridFieldConfig
     public function __construct()
     {
         parent::__construct();
+        $this->addToolbar();
         $this->addComponent(GridFieldToolbarHeader::create());
         $this->addComponent(GridFieldSortableHeader::create());
         $this->addComponent($this->columns());
         $this->addComponent(GridFieldPaginator::create(20));
+    }
+
+    /** Adds the same compact website search without introducing editing controls. */
+    private function addToolbar(): void
+    {
+        $toolbar = GridFieldToolbar::install($this);
+        $search = $toolbar->addItem('search', GridFieldToolbarLayout::LEFT, GridFieldToolbarLayout::CONTENT);
+        $this->addComponent(GridFieldSearch::create(
+            [MonitoringField::NAME, MonitoringField::BASE_URL], $search->getFragment()
+        ));
     }
 
     /** Defines escaped informational columns and explicit action buttons. */

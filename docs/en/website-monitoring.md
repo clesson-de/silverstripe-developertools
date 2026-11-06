@@ -9,6 +9,11 @@ installation. Open **Developer Tools > Monitoring** (requires `ADMIN` permission
 - **Configuration** manages websites, credentials and history.
 - **Notifications** configures automatic check summaries.
 
+Both website grids use the shared toolbar search for website names and base URLs.
+Press Enter to search or X to clear and submit; typing alone does not submit.
+The configuration grid's previous column filters are replaced by this search,
+with its existing add action on the right. The Info grid remains read-only.
+
 The central installation and customer installations use the same module.
 Enable the protected endpoint on each customer website, then
 [configure its URL and credentials centrally](#credentials-and-configuration).

@@ -21,6 +21,19 @@ use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\FunctionalTest;
 use SilverStripe\Security\SecurityToken;
+use Clesson\Silverstripe\DeveloperTools\Forms\GridFieldConfig_WebsitesInConfiguration;
+use Clesson\Silverstripe\DeveloperTools\Forms\GridFieldConfig_WebsitesInInfo;
+use Clesson\Silverstripe\Forms\GridField\GridFieldSearch;
+use Clesson\Silverstripe\Forms\GridField\GridFieldToolbar;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldButtonRow;
+use SilverStripe\Forms\GridField\GridFieldFilterHeader;
+use SilverStripe\Forms\GridField\GridFieldPaginator;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\Form;
+use SilverStripe\Control\Controller;
+use DOMDocument;
+use DOMXPath;
 
 /**
  * Covers monitoring UI routes without performing customer or provider requests.
@@ -206,6 +219,47 @@ class MonitoringInterfaceTest extends FunctionalTest
         self::assertStringContainsString('monitoring-status--unknown', $html);
         self::assertStringNotContainsString('col-Active', $html);
         self::assertStringNotContainsString($site->ApiToken, $html);
+    }
+
+    /** Both grids use the shared toolbar; only configuration retains a creation action. */
+    public function testWebsiteToolbarSearch(): void
+    {
+        $site = $this->website();
+        $this->logInWithPermission('ADMIN');
+        foreach ([GridFieldConfig_WebsitesInConfiguration::class, GridFieldConfig_WebsitesInInfo::class] as $class) {
+            $grid = GridField::create('Websites', '', MonitoredWebsite::get(), $class::create());
+            $form = Form::create(Controller::curr(), 'WebsiteToolbar', FieldList::create($grid), FieldList::create());
+            $form->setFormAction('/test');
+            $config = $grid->getConfig();
+            self::assertNull($config->getComponentByType(GridFieldFilterHeader::class));
+            self::assertInstanceOf(GridFieldToolbar::class, $config->getComponentByType(GridFieldButtonRow::class));
+            $search = $config->getComponentByType(GridFieldSearch::class);
+            self::assertSame(['Name', 'BaseURL'], $search->getSearchFields());
+            $document = new DOMDocument();
+            $document->loadHTML((string) $grid->FieldHolder(), LIBXML_NOERROR | LIBXML_NOWARNING);
+            $xpath = new DOMXPath($document);
+            self::assertCount(1, $xpath->query(
+                '//*[contains(@class, "gridfield-pro-toolbar__group--left")]//input[contains(@class, "gridfield-search__input")]'
+            ));
+            self::assertCount($class === GridFieldConfig_WebsitesInConfiguration::class ? 1 : 0, $xpath->query(
+                '//*[contains(@class, "gridfield-pro-toolbar__group--right")]//a[contains(@href, "/item/new")]'
+            ));
+            $components = array_values($config->getComponents()->toArray());
+            self::assertLessThan(
+                array_search($config->getComponentByType(GridFieldPaginator::class), $components, true),
+                array_search($search, $components, true)
+            );
+            foreach (['customer', 'example.com', 'missing', ''] as $term) {
+                $search->handleAction($grid, GridFieldSearch::ACTION, [], ['Websites' => [GridFieldSearch::QUERY => $term]]);
+                self::assertSame(
+                    $term === 'missing' ? [] : [$site->ID],
+                    $search->getManipulatedData($grid, $grid->getList())->columnUnique('ID')
+                );
+                self::assertSame([], $search->getManipulatedData(
+                    $grid, $grid->getList()->exclude('ID', $site->ID)
+                )->columnUnique('ID'));
+            }
+        }
     }
 
     /** Dashboard content is ADMIN-only and includes disabled sites without credentials. */

@@ -11,6 +11,10 @@ use Clesson\Silverstripe\DeveloperTools\Models\DeveloperToolsConfig;
 use Clesson\Silverstripe\DeveloperTools\Models\ToastMessage;
 use Clesson\Silverstripe\Markdown\FieldTypes\DBMarkdown;
 use Clesson\Silverstripe\Markdown\Forms\MarkdownEditorField;
+use Clesson\Silverstripe\Forms\GridField\GridFieldSearch;
+use Clesson\Silverstripe\Forms\GridField\GridFieldToolbar;
+use DOMDocument;
+use DOMXPath;
 use PHPUnit\Framework\Attributes\DataProvider;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Control\Controller;
@@ -24,6 +28,10 @@ use SilverStripe\Security\Group;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldButtonRow;
+use SilverStripe\Forms\GridField\GridFieldFilterHeader;
+use SilverStripe\Forms\GridField\GridFieldPaginator;
+use SilverStripe\i18n\i18n;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use SilverStripe\Forms\GridField\GridFieldDataColumns;
 use SilverStripe\Forms\GridField\GridFieldLazyLoader;
@@ -148,6 +156,51 @@ class ToastMessageTest extends SapphireTest
         $this->logOut();
         $this->expectException(HTTPResponse_Exception::class);
         $toggle->handleAction($grid, 'togglemonitoringactive', ['RecordID' => $toast->ID], []);
+    }
+
+    /** The shared toolbar replaces native filters and searches both persisted content fields before paging. */
+    public function testToolbarSearch(): void
+    {
+        $this->logInWithPermission('ADMIN');
+        $settings = DeveloperToolsConfig::currentRecord();
+        $title = ToastMessage::create(['Title' => 'Needle title', 'Message' => 'Other', 'SettingsID' => $settings->ID]);
+        $title->write();
+        $message = ToastMessage::create(['Message' => '**Needle** content', 'SettingsID' => $settings->ID]);
+        $message->write();
+        $outside = ToastMessage::create(['Message' => 'Needle outside']);
+        $outside->write();
+        $config = GridFieldConfig_ToastMessages::create();
+        $grid = GridField::create('ToastMessages', '', $settings->ToastMessages(), $config);
+        $form = Form::create(Controller::curr(), 'OverlayToolbarTest', FieldList::create($grid), FieldList::create());
+        $form->setFormAction('/test');
+        self::assertNull($config->getComponentByType(GridFieldFilterHeader::class));
+        self::assertInstanceOf(GridFieldToolbar::class, $config->getComponentByType(GridFieldButtonRow::class));
+        $search = $config->getComponentByType(GridFieldSearch::class);
+        self::assertSame([F::TITLE, F::MESSAGE_PLAIN], $search->getSearchFields());
+        self::assertSame('Suche in Titel und Nachricht', i18n::with_locale('de_DE', fn () => $search->getPlaceholder($grid)));
+        $document = new DOMDocument();
+        $document->loadHTML((string) $grid->FieldHolder(), LIBXML_NOERROR | LIBXML_NOWARNING);
+        $xpath = new DOMXPath($document);
+        self::assertCount(1, $xpath->query(
+            '//*[contains(@class, "gridfield-pro-toolbar__group--left")]//input[contains(@class, "gridfield-search__input")]'
+        ));
+        self::assertCount(1, $xpath->query(
+            '//*[contains(@class, "gridfield-pro-toolbar__group--right")]//a[contains(@href, "/item/new")]'
+        ));
+        $components = array_values($config->getComponents()->toArray());
+        self::assertLessThan(
+            array_search($config->getComponentByType(GridFieldPaginator::class), $components, true),
+            array_search($search, $components, true)
+        );
+        foreach (['needle', 'missing', ''] as $term) {
+            $grid->State->GridFieldPaginator->currentPage = 3;
+            $search->handleAction($grid, GridFieldSearch::ACTION, [], ['ToastMessages' => [GridFieldSearch::QUERY => $term]]);
+            self::assertEqualsCanonicalizing(
+                $term === 'missing' ? [] : [$title->ID, $message->ID],
+                $grid->getManipulatedList()->columnUnique('ID')
+            );
+            self::assertSame(1, $grid->State->GridFieldPaginator->currentPage);
+        }
     }
 
     /** Sort state works on a fresh grid, even before its header has been rendered. */
