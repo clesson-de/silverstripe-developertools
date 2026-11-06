@@ -8,6 +8,11 @@ templates. The CMS calls them **Overlays**; internal identifiers still use
 
 ## Managing overlays
 
+The list toolbar provides a compact search for titles and plaintext messages on
+the left and the add action on the right, replacing the previous column filters.
+Enter submits the search; X clears and submits it. Searches retain the settings
+scope and run before pagination.
+
 An introductory hint above the list explains the purpose and all targeting options.
 The overlay editor groups fields into **Content** (title, message, active),
 **Appearance** (type, position, autohide, close button) and **Filters**
@@ -149,5 +154,31 @@ The CMS calls this feature **Overlays**. Internal PHP classes, relations,
 database tables and asset filenames retain their `Toast`/`toasts` names for
 compatibility; the display-name change does not rename existing data.
 
-For rebuilding the overlay JavaScript and styles, see
-[Frontend Asset Development](../../README.md#frontend-asset-development).
+## Frontend asset build and versioning
+
+The module ships compiled files in `client/frontend/dist` and `client/admin/dist`.
+These generated files are part of the repository and must be committed.
+
+Use Node.js 22 from `.nvmrc` (`nvm use`), then run:
+
+```bash
+npm install
+npm run build
+npm test
+composer vendor-expose
+```
+
+`npm run build` includes:
+
+- `rollup -c` for JavaScript bundles
+- `sass ... --no-source-map` for stylesheet bundles
+
+Overlay sources and outputs:
+
+| Source | Output |
+|---|---|
+| `client/frontend/src/toasts.js` | `client/frontend/dist/toasts.js` |
+| `client/frontend/src/toasts.scss` | `client/frontend/dist/toasts.css` |
+
+Before release or handover, ensure changed files in `client/frontend/dist` and
+`client/admin/dist` are included in the commit.
