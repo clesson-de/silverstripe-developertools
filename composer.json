@@ -26,7 +26,8 @@
         "guzzlehttp/guzzle": "^7",
         "composer/semver": "^3",
         "psr/simple-cache": "^3",
-        "ext-curl": "*"
+        "ext-curl": "*",
+        "clesson-de/silverstripe-codeguard": "*"
     },
     "autoload": {
         "psr-4": {
@@ -37,5 +38,12 @@
         "expose": ["client/admin/dist", "client/frontend/dist"]
     },
     "prefer-stable": true,
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true,
+            "silverstripe/recipe-plugin": true,
+            "silverstripe/vendor-plugin": true
+        }
+    }
 }

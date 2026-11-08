@@ -29,6 +29,31 @@ vendor/bin/sake db:build --flush
 composer vendor-expose
 ```
 
+## Supported versions
+
+This package supports:
+
+- PHP 8.5
+- SilverStripe 6
+- SilverStripe CMS 6
+- SilverStripe Admin 3
+- SilverStripe Assets 3
+- SilverStripe Versioned 3
+
+## Configuration
+
+The module is installed as a standard SilverStripe vendormodule and is available in the CMS admin menu after rebuilding the project.
+
+After installation, run:
+
+```bash
+composer require clesson-de/silverstripe-developertools
+vendor/bin/sake db:build --flush
+composer vendor-expose
+```
+
+Then open the `Developer Tools` area in the CMS. No custom bootstrap code is required for the default setup.
+
 ## Quick usage
 
 Open **Developer Tools** in the CMS menu (`ADMIN` permission required):
@@ -92,4 +117,4 @@ Example (`.git/info/exclude`):
 
 ## License
 
-BSD 3-Clause - see [LICENSE](LICENSE).
+This project is licensed under the BSD-3-Clause license. See [LICENSE](LICENSE) for the full text.

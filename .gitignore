@@ -1,6 +1,7 @@
 # Dependencies
 /vendor/
 /node_modules/
+/composer.lock
 
 # IDE settings
 .idea/

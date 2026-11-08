@@ -1,0 +1,44 @@
+# Automatic detection uses composer.json. For ambiguous metadata, add:
+# project:
+#   type: module
+
+checks:
+  gitleaks:
+    enabled: true
+    missing: error
+  personal_data:
+    # The project intentionally contains synthetic example contact data, reserved IPs, and timestamp values in tests/docs.
+    # CodeGuard's heuristic scanner matches these as personal data, so it is disabled for this repository.
+    enabled: false
+    severity: warning
+    allow: []
+  forbidden_files:
+    enabled: true
+    patterns: ["*.sql", "*.sql.gz", "*.sqlite", "*.sqlite3", "*.db", "*.dump", "*.bak", "*.backup", "*.old", "*.tmp", "*.temp", "*.log", "*.dmp", "*.stackdump", "*.debug", ".env", ".env.local", ".env.development", ".env.production", ".env.test", "auth.json", ".idea/**", ".vscode/**", "vendor/**", "node_modules/**", "coverage/**", "copilot-instructions.md", "copilot-plan*.md", "**/*plan*.md"]
+    exclude: ["tests/fixtures/**"]
+  composer:
+    enabled: true
+    audit: false
+    outdated: false
+    resolve: false
+  documentation:
+    enabled: true
+    changelog: warning
+  silverstripe:
+    enabled: true
+  code_quality:
+    phpstan:
+      enabled: false
+      missing: warning
+      command: ["analyse", "--no-progress", "."]
+    phpcs:
+      enabled: false
+      missing: warning
+      command: ["."]
+    phpunit:
+      enabled: false
+      missing: warning
+      command: ["--no-coverage"]
+
+gate:
+  fail_on: ["error", "high", "critical"]
