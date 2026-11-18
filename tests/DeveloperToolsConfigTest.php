@@ -17,6 +17,7 @@ use SilverStripe\Admin\SingleRecordAdmin;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\FunctionalTest;
 use SilverStripe\Forms\ListboxField;
+use SilverStripe\i18n\i18n;
 
 /**
  * Covers singleton persistence, CMS tab structure and dashboard authorization.
@@ -56,9 +57,10 @@ class DeveloperToolsConfigTest extends FunctionalTest
      */
     public function testTabStructure(): void
     {
+        i18n::set_locale('en_US');
         $this->mockVersions();
         $fields = DeveloperToolsConfig::currentRecord()->getCMSFields();
-        self::assertSame(['Main', 'Monitoring', 'Toasts', 'Offline', 'Analysis'], $fields->fieldByName('Root')->getChildren()->column('Name'));
+        self::assertSame(['Main', 'Logs', 'Monitoring', 'Toasts', 'Offline', 'Analysis'], $fields->fieldByName('Root')->getChildren()->column('Name'));
         self::assertSame(['OfflineHint', 'OfflineActive', 'OfflineStart', 'OfflineEnd', 'OfflineIPExceptions'],
             $fields->fieldByName('Root.Offline')->getChildren()->column('Name'));
         $monitoringFields = $fields->fieldByName('Root.Monitoring')->getChildren();

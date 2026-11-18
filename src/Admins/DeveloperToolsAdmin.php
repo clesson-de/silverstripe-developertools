@@ -11,6 +11,10 @@ use Clesson\Silverstripe\DeveloperTools\Models\MonitoredWebsite;
 use Clesson\Silverstripe\DeveloperTools\Services\MonitoringCheckService;
 use Clesson\Silverstripe\DeveloperTools\Services\MonitoringTableRenderer;
 use Clesson\Silverstripe\DeveloperTools\Services\ProjectInformationService;
+use Clesson\Silverstripe\DeveloperTools\Services\ProjectLogReader;
+use Psr\Log\LoggerInterface;
+use RuntimeException;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Admin\SingleRecordAdmin;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Control\HTTPRequest;
@@ -58,6 +62,7 @@ class DeveloperToolsAdmin extends SingleRecordAdmin
         'monitoringDetails',
         'monitoringCheck',
         'monitoringWebsitesPanel',
+        'logContent',
     ];
 
     /**
@@ -66,6 +71,37 @@ class DeveloperToolsAdmin extends SingleRecordAdmin
     public function canView($member = null): bool
     {
         return Permission::check('ADMIN', 'any', $member ?? Security::getCurrentUser());
+    }
+
+    /** Serves log data only to CMS administrators, as inert plain text. */
+    public function logContent(HTTPRequest $request): HTTPResponse
+    {
+        if (!$this->canView()) {
+            return HTTPResponse::create('', 403);
+        }
+        $name = $request->getVar('file');
+        if (!is_string($name)) {
+            return HTTPResponse::create('', 404);
+        }
+        try {
+            $file = ProjectLogReader::singleton()->read($name);
+        } catch (RuntimeException $exception) {
+            Injector::inst()->get(LoggerInterface::class)->error('Unable to read project log.', ['exception' => $exception]);
+            return HTTPResponse::create(_t(__CLASS__ . '.LOG_ERROR', 'The log file could not be read.'), 500)
+                ->addHeader('Cache-Control', 'private, no-store');
+        }
+        if ($file === null) {
+            return HTTPResponse::create('', 404)->addHeader('Cache-Control', 'private, no-store');
+        }
+        $notice = $file['truncated']
+            ? _t(__CLASS__ . '.LOG_TRUNCATED', '[Only the last 1 MiB of this file is shown.]') . "\n\n"
+            : '';
+        return HTTPResponse::create($notice . $file['content'])
+            ->addHeader('Content-Type', 'text/plain; charset=utf-8')
+            ->addHeader('X-Content-Type-Options', 'nosniff')
+            ->addHeader('X-Frame-Options', 'SAMEORIGIN')
+            ->addHeader('Content-Security-Policy', "default-src 'none'; sandbox; frame-ancestors 'self'")
+            ->addHeader('Cache-Control', 'private, no-store');
     }
 
     /**

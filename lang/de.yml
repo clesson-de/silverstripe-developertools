@@ -136,9 +136,19 @@ de:
     EMPTY: 'Für diesen Prüflauf liegen keine Healthcheck-Ergebnisse vor.'
   Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
     MENUTITLE: 'Developer Tools'
+    LOG_ERROR: 'Die Logdatei konnte nicht gelesen werden.'
+    LOG_TRUNCATED: '[Es wird nur das letzte MiB dieser Datei angezeigt.]'
     WEBSITE: 'Webseite'
     ACTION_REQUIRED: 'Handlungsbedarf'
     NO_WEBSITES: 'Es wurden noch keine Webseiten konfiguriert.'
+  Clesson\Silverstripe\DeveloperTools\Forms\ProjectLogsTab:
+    TITLE: 'Logs'
+    DIRECTORY_ERROR: 'Das Log-Verzeichnis des Projekts fehlt oder ist nicht lesbar.'
+    EMPTY: 'Keine .log-Dateien gefunden.'
+    INTERVAL: 'Aktualisierungsintervall in Sekunden (5–360)'
+    ENABLE: 'Automatische Aktualisierung aktivieren'
+    INVALID_INTERVAL: 'Bitte eine ganze Zahl zwischen 5 und 360 eingeben.'
+    FRAME_TITLE: 'Inhalt der Logdatei'
   Clesson\Silverstripe\DeveloperTools\Panels\MonitoringWebsitesPanel:
     TITLE: 'Webseiten-Monitoring'
   Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:

@@ -13,6 +13,7 @@ use Clesson\Silverstripe\DeveloperTools\Forms\GridFieldConfig_ToastMessages;
 use Clesson\Silverstripe\DeveloperTools\Constants\ToastField;
 use Clesson\Silverstripe\DeveloperTools\Constants\OfflineField;
 use Clesson\Silverstripe\DeveloperTools\Forms\OfflineModeTab;
+use Clesson\Silverstripe\DeveloperTools\Forms\ProjectLogsTab;
 use Clesson\Silverstripe\DeveloperTools\Services\OfflineMode;
 use Clesson\Silverstripe\DeveloperTools\Panels\ProjectInformationPanel;
 use Clesson\Silverstripe\DeveloperTools\Panels\MonitoringWebsitesPanel;
@@ -146,6 +147,7 @@ class DeveloperToolsConfig extends DataObject
         $rootField = TabSet::create(
             'Root',
             $this->buildDashboardTab(),
+            (new ProjectLogsTab())->build(),
             $this->buildMonitoringTabSet(),
             $this->buildToastsTab(),
             (new OfflineModeTab())->build(),

@@ -1,4 +1,50 @@
 const pending = new WeakSet();
+const logTimers = new WeakMap();
+
+function updateLogTimer(viewer) {
+  clearInterval(logTimers.get(viewer));
+  logTimers.delete(viewer);
+  const enabled = viewer.querySelector('[data-log-enabled]');
+  const interval = viewer.querySelector('[data-log-interval]');
+  const error = viewer.querySelector('[data-log-error]');
+  const valid = interval.value !== '' && interval.validity.valid && Number.isInteger(Number(interval.value));
+  error.hidden = valid;
+  interval.setAttribute('aria-invalid', String(!valid));
+  if (!enabled.checked || !valid) return;
+  const timer = setInterval(() => {
+    if (!viewer.isConnected) {
+      clearInterval(timer);
+      return;
+    }
+    const frame = viewer.querySelector('[data-log-frame]');
+    if (frame.getAttribute('src')) frame.src = frame.src;
+  }, Number(interval.value) * 1000);
+  logTimers.set(viewer, timer);
+}
+
+document.addEventListener('change', (event) => {
+  if (!(event.target instanceof Element)) return;
+  if (event.target.matches('[data-log-enabled], [data-log-interval]')) {
+    updateLogTimer(event.target.closest('[data-log-viewer]'));
+  }
+});
+
+document.addEventListener('input', (event) => {
+  if (event.target instanceof Element && event.target.matches('[data-log-interval]')) {
+    updateLogTimer(event.target.closest('[data-log-viewer]'));
+  }
+});
+
+document.addEventListener('click', (event) => {
+  if (!(event.target instanceof Element)) return;
+  const link = event.target.closest('[data-log-file]');
+  if (!link) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const viewer = link.closest('.developer-tools-logs').querySelector('[data-log-viewer]');
+  viewer.hidden = false;
+  viewer.querySelector('[data-log-frame]').src = link.href;
+});
 
 function detailCell(row) {
   let detail = row.nextElementSibling;

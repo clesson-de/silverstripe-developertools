@@ -16,6 +16,7 @@ offline mode and project analysis.
 ## Core capabilities
 
 - **Dashboard**: single shared `DeveloperToolsConfig` with dashboard panels.
+- **Logs**: administrator-only view of `.log` files in the project's `logs` directory.
 - **Monitoring**: central website inventory, health status and notifications.
 - **Overlays**: CMS-managed frontend notices with audience and time filters.
 - **Offline mode**: static maintenance page with scheduling and IP exceptions.
@@ -59,10 +60,18 @@ Then open the `Developer Tools` area in the CMS. No custom bootstrap code is req
 Open **Developer Tools** in the CMS menu (`ADMIN` permission required):
 
 1. **Dashboard**
-2. **Monitoring**
-3. **Overlays**
-4. **Offline mode**
-5. **Analysis**
+2. **Logs**
+3. **Monitoring**
+4. **Overlays**
+5. **Offline mode**
+6. **Analysis**
+
+The Logs tab lists regular `.log` files directly inside `<project>/logs` (not
+subdirectories or symlinks). A selected file is shown as plain text with at most
+the last 1 MiB; a notice marks truncated content. Automatic refresh is opt-in and
+accepts whole seconds from 5 to 360. The PHP process must be able to read the
+directory and files. Restrict CMS administrator access: logs may contain secrets
+or personal data. Files without a `.log` extension are not displayed.
 
 After upgrades, rerun:
 
