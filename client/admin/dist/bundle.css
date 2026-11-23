@@ -196,15 +196,18 @@
   background: #f5f7f9;
   color: #1f2d3d;
   text-decoration: none;
+  font-weight: 400;
+}
+.developer-tools-logs__badge:link, .developer-tools-logs__badge:visited, .developer-tools-logs__badge:active {
+  color: #1f2d3d;
+  text-decoration: none;
 }
 .developer-tools-logs__badge:hover, .developer-tools-logs__badge:focus {
   border-color: #8c949b;
   background: #eef2f5;
 }
 .developer-tools-logs__badge--active {
-  border-color: #6c747c;
   background: #e5eaef;
-  font-weight: 600;
 }
 
 .developer-tools-logs__empty {

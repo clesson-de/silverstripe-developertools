@@ -30,6 +30,11 @@ test('log viewer refresh is opt-in and accepts only integer seconds from 5 to 36
   assert.equal(viewer.hidden, false);
   assert.equal(document.querySelector('[data-log-file]').classList.contains('developer-tools-logs__badge--active'), true);
   assert.equal(document.querySelector('iframe').src, 'https://example.test/log?file=app.log');
+  document.querySelector('[data-log-file]').click();
+  assert.equal(viewer.hidden, true);
+  assert.equal(document.querySelector('[data-log-file]').classList.contains('developer-tools-logs__badge--active'), false);
+  document.querySelector('[data-log-file]').click();
+  assert.equal(viewer.hidden, false);
   assert.equal(timers.size, 0);
   enabled.checked = true;
   enabled.dispatchEvent(new dom.window.Event('change', { bubbles: true }));

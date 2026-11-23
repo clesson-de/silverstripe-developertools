@@ -10,6 +10,7 @@ use Clesson\Silverstripe\DeveloperTools\Helpers\RoutesReader;
 use Clesson\Silverstripe\DeveloperTools\Services\ProjectInformationService;
 use Clesson\Silverstripe\DeveloperTools\Services\HealthCheckService;
 use Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer;
+use SilverStripe\Control\Director;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig;
 use SilverStripe\Forms\GridField\GridFieldDataColumns;
@@ -53,6 +54,9 @@ class AnalysisTabSet
             _t(__CLASS__ . '.TAB_PROJECT_INFORMATION', 'Project Information')
         );
         foreach (ProjectInformationService::singleton()->getInformation() as $key => $value) {
+            if ($key === ProjectInformationField::DATABASE_VERSION) {
+                $value = $this->withEnvironmentHint($value);
+            }
             /** @var ReadonlyField $informationField */
             $informationField = ReadonlyField::create($key, ProjectInformationField::label($key), $value);
             $tab->push($informationField);
@@ -60,6 +64,11 @@ class AnalysisTabSet
         $tab->push(LiteralField::create('SystemHealth',
             HealthReportRenderer::create()->render(HealthCheckService::singleton()->collect())));
         return $tab;
+    }
+
+    private function withEnvironmentHint(string $databaseVersion): string
+    {
+        return sprintf('%s (%s)', $databaseVersion, Director::isLive() ? 'LIVE' : 'DEV');
     }
 
     /**

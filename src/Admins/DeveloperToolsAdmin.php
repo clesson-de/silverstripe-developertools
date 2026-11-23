@@ -18,6 +18,7 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Admin\SingleRecordAdmin;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\Director;
 use SilverStripe\Security\SecurityToken;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\Security;
@@ -42,7 +43,7 @@ class DeveloperToolsAdmin extends SingleRecordAdmin
     private static float $menu_priority = -200;
 
     /** @config */
-    private static string $menu_icon_class = 'font-icon-list';
+    private static string $menu_icon_class = 'font-icon-explore-addons';
 
     /** @config */
     private static string $required_permission_codes = 'ADMIN';
@@ -144,6 +145,9 @@ class DeveloperToolsAdmin extends SingleRecordAdmin
         }
         $rows = [];
         foreach (ProjectInformationService::singleton()->getInformation() as $key => $value) {
+            if ($key === ProjectInformationField::DATABASE_VERSION) {
+                $value = $this->withEnvironmentHint($value);
+            }
             $rows[] = ['Label' => ProjectInformationField::label($key), 'Value' => $value];
         }
         $html = ArrayData::create(['Rows' => $rows])->renderWith(
@@ -152,6 +156,11 @@ class DeveloperToolsAdmin extends SingleRecordAdmin
         return HTTPResponse::create((string) $html)
             ->addHeader('Content-Type', 'text/html; charset=utf-8')
             ->addHeader('Cache-Control', 'private, no-store');
+    }
+
+    private function withEnvironmentHint(string $databaseVersion): string
+    {
+        return sprintf('%s (%s)', $databaseVersion, Director::isLive() ? 'LIVE' : 'DEV');
     }
 
     /** Returns cached version details to administrators only. */

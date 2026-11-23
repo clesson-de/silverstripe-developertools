@@ -10,6 +10,7 @@ use Clesson\Silverstripe\DeveloperTools\Controllers\ProjectInformationController
 use Clesson\Silverstripe\DeveloperTools\Models\DeveloperToolsConfig;
 use Clesson\Silverstripe\DeveloperTools\Services\ProjectInformationService;
 use Clesson\Silverstripe\DeveloperTools\Services\HealthCheckService;
+use SilverStripe\Control\Director;
 use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\FunctionalTest;
@@ -140,6 +141,9 @@ class ProjectInformationTest extends FunctionalTest
         $admin = DeveloperToolsAdmin::create();
         $fields = DeveloperToolsConfig::create()->getCMSFields();
         foreach (self::INFORMATION as $key => $value) {
+            if ($key === ProjectInformationField::DATABASE_VERSION) {
+                $value = sprintf('%s (%s)', $value, Director::isLive() ? 'LIVE' : 'DEV');
+            }
             $field = $fields->dataFieldByName($key);
             self::assertInstanceOf(ReadonlyField::class, $field);
             self::assertSame($value, $field->dataValue());

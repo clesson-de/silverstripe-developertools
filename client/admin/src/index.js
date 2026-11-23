@@ -1,6 +1,11 @@
 const pending = new WeakSet();
 const logTimers = new WeakMap();
 
+function stopLogTimer(viewer) {
+  clearInterval(logTimers.get(viewer));
+  logTimers.delete(viewer);
+}
+
 function showToast(type, text) {
   if (window.jQuery && typeof window.jQuery.noticeAdd === 'function') {
     window.jQuery.noticeAdd({ text, type, stayTime: 5000, inEffect: { left: '0', opacity: 'show' } });
@@ -25,8 +30,7 @@ function reloadFrame(frame, src) {
 }
 
 function updateLogTimer(viewer) {
-  clearInterval(logTimers.get(viewer));
-  logTimers.delete(viewer);
+  stopLogTimer(viewer);
   const enabled = viewer.querySelector('[data-log-enabled]');
   const interval = viewer.querySelector('[data-log-interval]');
   const error = viewer.querySelector('[data-log-error]');
@@ -93,10 +97,17 @@ document.addEventListener('click', (event) => {
   event.stopPropagation();
   const logs = link.closest('.developer-tools-logs');
   const viewer = logs.querySelector('[data-log-viewer]');
+  const isActive = link.classList.contains('developer-tools-logs__badge--active');
   logs.querySelectorAll('[data-log-file]').forEach((element) => {
     element.classList.remove('developer-tools-logs__badge--active');
     element.setAttribute('aria-pressed', 'false');
   });
+  if (isActive) {
+    viewer.hidden = true;
+    viewer.dataset.logFile = '';
+    stopLogTimer(viewer);
+    return;
+  }
   link.classList.add('developer-tools-logs__badge--active');
   link.setAttribute('aria-pressed', 'true');
   viewer.dataset.logFile = link.dataset.logName || '';

@@ -176,6 +176,14 @@
   background: #f5f7f9;
   color: #1f2d3d;
   text-decoration: none;
+  font-weight: 400;
+
+  &:link,
+  &:visited,
+  &:active {
+    color: #1f2d3d;
+    text-decoration: none;
+  }
 
   &:hover,
   &:focus {
@@ -184,9 +192,7 @@
   }
 
   &--active {
-    border-color: #6c747c;
     background: #e5eaef;
-    font-weight: 600;
   }
 }
 
