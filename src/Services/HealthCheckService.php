@@ -6,6 +6,7 @@ namespace Clesson\Silverstripe\DeveloperTools\Services;
 
 use Clesson\Silverstripe\DeveloperTools\Constants\HealthStatus;
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\HealthCheck;
+use Clesson\Silverstripe\DeveloperTools\HealthChecks\ConfigurationHealthCheck;
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\NodeHealthCheck;
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\RuntimeHealthCheck;
 use LogicException;
@@ -27,6 +28,7 @@ class HealthCheckService
     /** @config Trusted check classes; projects may register additional implementations. */
     private static array $checks = [
         'runtime' => RuntimeHealthCheck::class,
+        'configuration' => ConfigurationHealthCheck::class,
         'node' => NodeHealthCheck::class,
     ];
     /** Cooperative wall-clock budget in seconds, not a PHP execution sandbox. */

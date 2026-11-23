@@ -60,7 +60,7 @@ class DeveloperToolsConfigTest extends FunctionalTest
         i18n::set_locale('en_US');
         $this->mockVersions();
         $fields = DeveloperToolsConfig::currentRecord()->getCMSFields();
-        self::assertSame(['Main', 'Logs', 'Monitoring', 'Toasts', 'Offline', 'Analysis'], $fields->fieldByName('Root')->getChildren()->column('Name'));
+        self::assertSame(['Main', 'Logs', 'Analysis', 'Toasts', 'Offline', 'Monitoring'], $fields->fieldByName('Root')->getChildren()->column('Name'));
         self::assertSame(['OfflineHint', 'OfflineActive', 'OfflineStart', 'OfflineEnd', 'OfflineIPExceptions'],
             $fields->fieldByName('Root.Offline')->getChildren()->column('Name'));
         $monitoringFields = $fields->fieldByName('Root.Monitoring')->getChildren();

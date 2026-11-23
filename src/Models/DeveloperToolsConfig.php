@@ -137,7 +137,7 @@ class DeveloperToolsConfig extends DataObject
     }
 
     /**
-     * Places Dashboard first, followed by Monitoring, Overlays, Offline mode and Analysis.
+     * Places Dashboard first, then Logs, Analysis, Overlays, Offline mode and Monitoring.
      */
     public function getCMSFields(): FieldList
     {
@@ -148,10 +148,10 @@ class DeveloperToolsConfig extends DataObject
             'Root',
             $this->buildDashboardTab(),
             (new ProjectLogsTab())->build(),
-            $this->buildMonitoringTabSet(),
+            (new AnalysisTabSet())->build(),
             $this->buildToastsTab(),
             (new OfflineModeTab())->build(),
-            (new AnalysisTabSet())->build()
+            $this->buildMonitoringTabSet()
         );
         $fields->push($rootField);
         return $fields;

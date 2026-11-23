@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Clesson\Silverstripe\DeveloperTools\Tests;
 
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\HealthCheck;
+use Clesson\Silverstripe\DeveloperTools\HealthChecks\ConfigurationHealthCheck;
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\NodeHealthCheck;
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\RuntimeHealthCheck;
 use Clesson\Silverstripe\DeveloperTools\Helpers\NodeRequirementFinder;
@@ -18,10 +19,12 @@ use Clesson\Silverstripe\DeveloperTools\Services\ReleaseMetadataClient;
 use DomainException;
 use LogicException;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use RuntimeException;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Control\Director;
+use SilverStripe\Control\Email\Email;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use stdClass;
@@ -298,6 +301,66 @@ class HealthCheckTest extends SapphireTest
         self::assertSame('unknown', $rows['runtime.https']['status']);
         self::assertStringContainsString('not HTTP', $rows['runtime.webroot']['message']);
         self::assertCount(3, $rows);
+    }
+
+    /** Missing admin sender email is visible while logger and public root checks still pass. */
+    public function testConfigurationHealthCheckWithoutSenderEmail(): void
+    {
+        Config::modify()->set(Email::class, 'admin_email', '');
+        Injector::inst()->registerService($this->createMock(LoggerInterface::class), LoggerInterface::class);
+        $results = HealthReport::create()->normalize((new ConfigurationHealthCheck())->run(microtime(true) + 1));
+        $rows = array_column($results, null, 'id');
+        self::assertSame('ok', $rows['config.logger']['status']);
+        self::assertSame('warning', $rows['config.sender']['status']);
+    }
+
+    /** A PHP file in the public root is flagged as an exposure risk. */
+    public function testConfigurationHealthCheckDetectsPublicPhpFiles(): void
+    {
+        Config::modify()->set(Email::class, 'admin_email', 'sender@example.test');
+        Injector::inst()->registerService($this->createMock(LoggerInterface::class), LoggerInterface::class);
+        $public = Director::publicFolder();
+        $file = $public . '/developertools-healthcheck-test.php';
+        file_put_contents($file, '<?php echo 1;');
+        try {
+            $results = HealthReport::create()->normalize((new ConfigurationHealthCheck())->run(microtime(true) + 1));
+            $rows = array_column($results, null, 'id');
+            self::assertSame('error', $rows['config.public_php']['status']);
+            self::assertStringContainsString('developertools-healthcheck-test.php', $rows['config.public_php']['message']);
+        } finally {
+            unlink($file);
+        }
+    }
+
+    /** Existing sitemap and robots files are reported as available. */
+    public function testConfigurationHealthCheckDetectsSitemapAndRobots(): void
+    {
+        Config::modify()->set(Email::class, 'admin_email', 'sender@example.test');
+        Injector::inst()->registerService($this->createMock(LoggerInterface::class), LoggerInterface::class);
+        $public = Director::publicFolder();
+        $sitemap = $public . '/sitemap.xml';
+        $robots = $public . '/robots.txt';
+        $sitemapOriginal = is_file($sitemap) ? file_get_contents($sitemap) : false;
+        $robotsOriginal = is_file($robots) ? file_get_contents($robots) : false;
+        file_put_contents($sitemap, '<urlset/>');
+        file_put_contents($robots, "User-agent: *\nDisallow:\n");
+        try {
+            $results = HealthReport::create()->normalize((new ConfigurationHealthCheck())->run(microtime(true) + 1));
+            $rows = array_column($results, null, 'id');
+            self::assertSame('ok', $rows['config.sitemap']['status']);
+            self::assertSame('ok', $rows['config.robots']['status']);
+        } finally {
+            if ($sitemapOriginal === false) {
+                unlink($sitemap);
+            } else {
+                file_put_contents($sitemap, $sitemapOriginal);
+            }
+            if ($robotsOriginal === false) {
+                unlink($robots);
+            } else {
+                file_put_contents($robots, $robotsOriginal);
+            }
+        }
     }
 
     /** Installs isolated in-memory provider metadata. */
