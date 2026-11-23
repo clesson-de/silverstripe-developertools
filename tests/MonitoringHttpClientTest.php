@@ -242,7 +242,7 @@ class MonitoringHttpClientTest extends SapphireTest
         try {
             self::assertSame([1048576, 0, 1048576], $client->exerciseWriter($handle));
         } finally {
-            curl_close($handle);
+            unset($handle);
         }
     }
 }

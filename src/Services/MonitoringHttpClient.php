@@ -65,7 +65,7 @@ class MonitoringHttpClient
         }
     }
 
-    /** Limits bytes before appending and releases cURL resources on every path. */
+    /** Limits bytes before appending and relies on CurlHandle lifecycle cleanup. */
     private function request(string $url, string $host, int $port, string $address, string $token): string
     {
         $handle = curl_init();
@@ -78,7 +78,7 @@ class MonitoringHttpClient
             curl_setopt($handle, CURLOPT_WRITEFUNCTION, $this->bodyWriter($body));
             return $this->readResponse($handle, $body);
         } finally {
-            curl_close($handle);
+            unset($handle);
         }
     }
 
