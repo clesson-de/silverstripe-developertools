@@ -136,6 +136,7 @@ en:
     EMPTY: 'No health results available for this attempt.'
   Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
     MENUTITLE: 'Developer Tools'
+    ENVIRONMENT: 'Environment'
     LOG_ERROR: 'The log file could not be read.'
     LOG_RESET_ERROR: 'The log file could not be reset.'
     LOG_TRUNCATED: '[Only the last 1 MiB of this file is shown.]'
@@ -159,6 +160,7 @@ en:
   Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
     TAB_ANALYSIS: 'Analysis'
     TAB_PROJECT_INFORMATION: 'Project Information'
+    ENVIRONMENT: 'Environment'
     TAB_COMPOSER_PACKAGES: 'Composer Packages'
     COLUMN_NAME: 'Package'
     COLUMN_VERSION: 'Version'

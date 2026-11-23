@@ -150,6 +150,10 @@ class DeveloperToolsAdmin extends SingleRecordAdmin
             }
             $rows[] = ['Label' => ProjectInformationField::label($key), 'Value' => $value];
         }
+        $rows[] = [
+            'Label' => _t(__CLASS__ . '.ENVIRONMENT', 'Environment'),
+            'Value' => Director::isLive() ? 'LIVE' : 'DEV',
+        ];
         $html = ArrayData::create(['Rows' => $rows])->renderWith(
             'Clesson/Silverstripe/DeveloperTools/ProjectInformationPanel'
         );

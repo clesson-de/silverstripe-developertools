@@ -61,6 +61,11 @@ class AnalysisTabSet
             $informationField = ReadonlyField::create($key, ProjectInformationField::label($key), $value);
             $tab->push($informationField);
         }
+        $tab->push(ReadonlyField::create(
+            'environment_type',
+            _t(__CLASS__ . '.ENVIRONMENT', 'Environment'),
+            Director::isLive() ? 'LIVE' : 'DEV'
+        ));
         $tab->push(LiteralField::create('SystemHealth',
             HealthReportRenderer::create()->render(HealthCheckService::singleton()->collect())));
         return $tab;
