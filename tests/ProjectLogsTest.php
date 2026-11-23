@@ -9,6 +9,7 @@ use Clesson\Silverstripe\DeveloperTools\Forms\ProjectLogsTab;
 use Clesson\Silverstripe\DeveloperTools\Services\ProjectLogReader;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\FunctionalTest;
+use SilverStripe\Security\SecurityToken;
 
 class ProjectLogsTest extends FunctionalTest
 {
@@ -52,6 +53,8 @@ class ProjectLogsTest extends FunctionalTest
         self::assertStringContainsString('&lt;danger&gt;.log', $html);
         self::assertStringNotContainsString('ignored.txt', $html);
         self::assertStringContainsString('sandbox', $html);
+        self::assertStringContainsString('developer-tools-logs__badge', $html);
+        self::assertStringContainsString('data-log-reset', $html);
         self::assertStringContainsString('min="5"', $html);
         self::assertStringContainsString('max="360"', $html);
     }
@@ -98,5 +101,25 @@ class ProjectLogsTest extends FunctionalTest
         $this->logInWithPermission('ADMIN');
         $response = $this->get(DeveloperToolsAdmin::singleton()->Link('logContent') . '?file=application.log');
         self::assertSame(500, $response->getStatusCode());
+    }
+
+    public function testResetRequiresAdministratorAndCsrfAndClearsFile(): void
+    {
+        $url = DeveloperToolsAdmin::singleton()->Link('resetLogContent');
+        self::assertNotSame(204, $this->post($url, ['file' => 'application.log'])->getStatusCode());
+        $this->logInWithPermission('ADMIN');
+        $response = $this->post($url, ['file' => 'application.log']);
+        self::assertSame(403, $response->getStatusCode());
+        $response = $this->post($url, [
+            'file' => 'application.log',
+            'SecurityID' => SecurityToken::inst()->getValue(),
+        ]);
+        self::assertSame(204, $response->getStatusCode());
+        self::assertSame('', file_get_contents($this->directory . '/application.log'));
+        $response = $this->post($url, [
+            'file' => '../application.log',
+            'SecurityID' => SecurityToken::inst()->getValue(),
+        ]);
+        self::assertSame(404, $response->getStatusCode());
     }
 }

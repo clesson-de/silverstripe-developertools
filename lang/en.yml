@@ -136,9 +136,24 @@ en:
     EMPTY: 'No health results available for this attempt.'
   Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
     MENUTITLE: 'Developer Tools'
+    LOG_ERROR: 'The log file could not be read.'
+    LOG_RESET_ERROR: 'The log file could not be reset.'
+    LOG_TRUNCATED: '[Only the last 1 MiB of this file is shown.]'
     WEBSITE: 'Website'
     ACTION_REQUIRED: 'Action required'
     NO_WEBSITES: 'No websites have been configured.'
+  Clesson\Silverstripe\DeveloperTools\Forms\ProjectLogsTab:
+    TITLE: 'Logs'
+    DIRECTORY_ERROR: 'The project logs directory is missing or unreadable.'
+    EMPTY: 'No .log files found.'
+    INTERVAL: 'Refresh interval in seconds (5–360)'
+    ENABLE: 'Enable automatic refresh'
+    INVALID_INTERVAL: 'Enter a whole number between 5 and 360.'
+    FRAME_TITLE: 'Log contents'
+    RESET: 'Reset file'
+    RESET_CONFIRM: 'Do you really want to reset {file}? This cannot be undone.'
+    RESET_SUCCESS: 'The log file has been reset.'
+    RESET_ERROR: 'The log file could not be reset.'
   Clesson\Silverstripe\DeveloperTools\Panels\MonitoringWebsitesPanel:
     TITLE: 'Website Monitoring'
   Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:

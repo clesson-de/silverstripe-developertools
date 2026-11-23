@@ -49,13 +49,8 @@ class ProjectLogReader
     /** @return array{content: string, truncated: bool}|null */
     public function read(string $name): ?array
     {
-        if ($name === '' || basename($name) !== $name || str_contains($name, '\\')
-            || str_contains($name, "\0") || !preg_match('/\.log$/i', $name)) {
-            return null;
-        }
-        $directory = $this->directory();
-        $path = $directory . DIRECTORY_SEPARATOR . $name;
-        if (is_link($path) || !is_file($path) || realpath($path) !== $path) {
+        $path = $this->path($name);
+        if ($path === null) {
             return null;
         }
         if (!is_readable($path)) {
@@ -85,5 +80,46 @@ class ProjectLogReader
         } finally {
             fclose($handle);
         }
+    }
+
+    public function clear(string $name): bool
+    {
+        $path = $this->path($name);
+        if ($path === null) {
+            return false;
+        }
+        $handle = @fopen($path, 'c+b');
+        if ($handle === false) {
+            throw new RuntimeException('The selected log file could not be opened.');
+        }
+        try {
+            $stat = fstat($handle);
+            clearstatcache(true, $path);
+            $pathStat = @lstat($path);
+            if ($stat === false || $pathStat === false || is_link($path)
+                || $stat['dev'] !== $pathStat['dev'] || $stat['ino'] !== $pathStat['ino']) {
+                throw new RuntimeException('The selected log file could not be inspected.');
+            }
+            if (!ftruncate($handle, 0) || fseek($handle, 0) !== 0 || !fflush($handle)) {
+                throw new RuntimeException('The selected log file could not be reset.');
+            }
+            return true;
+        } finally {
+            fclose($handle);
+        }
+    }
+
+    private function path(string $name): ?string
+    {
+        if ($name === '' || basename($name) !== $name || str_contains($name, '\\')
+            || str_contains($name, "\0") || !preg_match('/\.log$/i', $name)) {
+            return null;
+        }
+        $directory = $this->directory();
+        $path = $directory . DIRECTORY_SEPARATOR . $name;
+        if (is_link($path) || !is_file($path) || realpath($path) !== $path) {
+            return null;
+        }
+        return $path;
     }
 }

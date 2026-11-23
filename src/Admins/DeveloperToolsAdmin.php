@@ -63,6 +63,7 @@ class DeveloperToolsAdmin extends SingleRecordAdmin
         'monitoringCheck',
         'monitoringWebsitesPanel',
         'logContent',
+        'resetLogContent',
     ];
 
     /**
@@ -102,6 +103,35 @@ class DeveloperToolsAdmin extends SingleRecordAdmin
             ->addHeader('X-Frame-Options', 'SAMEORIGIN')
             ->addHeader('Content-Security-Policy', "default-src 'none'; sandbox; frame-ancestors 'self'")
             ->addHeader('Cache-Control', 'private, no-store');
+    }
+
+    /** Empties a selected project log for administrators using CSRF-protected POST. */
+    public function resetLogContent(HTTPRequest $request): HTTPResponse
+    {
+        if (!$this->canView()) {
+            return HTTPResponse::create('', 403);
+        }
+        if ($request->httpMethod() !== 'POST') {
+            return HTTPResponse::create('', 405)->addHeader('Allow', 'POST');
+        }
+        if (!SecurityToken::inst()->checkRequest($request)) {
+            return HTTPResponse::create('', 403);
+        }
+        $name = $request->postVar('file');
+        if (!is_string($name)) {
+            return HTTPResponse::create('', 404)->addHeader('Cache-Control', 'private, no-store');
+        }
+        try {
+            $cleared = ProjectLogReader::singleton()->clear($name);
+        } catch (RuntimeException $exception) {
+            Injector::inst()->get(LoggerInterface::class)->error('Unable to reset project log.', ['exception' => $exception]);
+            return HTTPResponse::create(_t(__CLASS__ . '.LOG_RESET_ERROR', 'The log file could not be reset.'), 500)
+                ->addHeader('Cache-Control', 'private, no-store');
+        }
+        if (!$cleared) {
+            return HTTPResponse::create('', 404)->addHeader('Cache-Control', 'private, no-store');
+        }
+        return HTTPResponse::create('', 204)->addHeader('Cache-Control', 'private, no-store');
     }
 
     /**

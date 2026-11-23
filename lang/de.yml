@@ -137,6 +137,7 @@ de:
   Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
     MENUTITLE: 'Developer Tools'
     LOG_ERROR: 'Die Logdatei konnte nicht gelesen werden.'
+    LOG_RESET_ERROR: 'Die Logdatei konnte nicht zurückgesetzt werden.'
     LOG_TRUNCATED: '[Es wird nur das letzte MiB dieser Datei angezeigt.]'
     WEBSITE: 'Webseite'
     ACTION_REQUIRED: 'Handlungsbedarf'
@@ -149,6 +150,10 @@ de:
     ENABLE: 'Automatische Aktualisierung aktivieren'
     INVALID_INTERVAL: 'Bitte eine ganze Zahl zwischen 5 und 360 eingeben.'
     FRAME_TITLE: 'Inhalt der Logdatei'
+    RESET: 'Datei zurücksetzen'
+    RESET_CONFIRM: 'Möchten Sie {file} wirklich zurücksetzen? Dieser Vorgang kann nicht rückgängig gemacht werden.'
+    RESET_SUCCESS: 'Die Logdatei wurde zurückgesetzt.'
+    RESET_ERROR: 'Die Logdatei konnte nicht zurückgesetzt werden.'
   Clesson\Silverstripe\DeveloperTools\Panels\MonitoringWebsitesPanel:
     TITLE: 'Webseiten-Monitoring'
   Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:

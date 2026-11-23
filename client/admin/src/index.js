@@ -1,6 +1,29 @@
 const pending = new WeakSet();
 const logTimers = new WeakMap();
 
+function showToast(type, text) {
+  if (window.jQuery && typeof window.jQuery.noticeAdd === 'function') {
+    window.jQuery.noticeAdd({ text, type, stayTime: 5000, inEffect: { left: '0', opacity: 'show' } });
+  }
+}
+
+function reloadFrame(frame, src) {
+  if (!frame || !src) return Promise.resolve();
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      frame.removeEventListener('load', finish);
+      resolve();
+    };
+    const timeout = setTimeout(finish, 10000);
+    frame.addEventListener('load', finish, { once: true });
+    frame.src = src;
+  });
+}
+
 function updateLogTimer(viewer) {
   clearInterval(logTimers.get(viewer));
   logTimers.delete(viewer);
@@ -37,11 +60,46 @@ document.addEventListener('input', (event) => {
 
 document.addEventListener('click', (event) => {
   if (!(event.target instanceof Element)) return;
+  const reset = event.target.closest('[data-log-reset]');
+  if (reset) {
+    event.preventDefault();
+    event.stopPropagation();
+    const viewer = reset.closest('[data-log-viewer]');
+    const token = reset.closest('form')?.querySelector('[name="SecurityID"]');
+    const file = viewer?.dataset.logFile || '';
+    const fileLabel = `\`${file}\``;
+    const message = (viewer?.dataset.logResetConfirm || '').split('{file}').join(fileLabel);
+    if (!viewer || !file || !token?.value || !viewer.dataset.logResetUrl || !window.confirm(message)) return;
+    const frame = viewer.querySelector('[data-log-frame]');
+    reset.disabled = true;
+    const data = new URLSearchParams({ SecurityID: token.value, file });
+    fetch(viewer.dataset.logResetUrl, {
+      method: 'POST', body: data, credentials: 'same-origin', redirect: 'error',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+    }).then((response) => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      showToast('success', viewer.dataset.logResetSuccess || 'Done.');
+      return reloadFrame(frame, frame?.getAttribute('src'));
+    }).catch((error) => {
+      showToast('error', `${viewer.dataset.logResetError || 'Request failed.'} (${error.message})`);
+    }).finally(() => {
+      reset.disabled = false;
+    });
+    return;
+  }
   const link = event.target.closest('[data-log-file]');
   if (!link) return;
   event.preventDefault();
   event.stopPropagation();
-  const viewer = link.closest('.developer-tools-logs').querySelector('[data-log-viewer]');
+  const logs = link.closest('.developer-tools-logs');
+  const viewer = logs.querySelector('[data-log-viewer]');
+  logs.querySelectorAll('[data-log-file]').forEach((element) => {
+    element.classList.remove('developer-tools-logs__badge--active');
+    element.setAttribute('aria-pressed', 'false');
+  });
+  link.classList.add('developer-tools-logs__badge--active');
+  link.setAttribute('aria-pressed', 'true');
+  viewer.dataset.logFile = link.dataset.logName || '';
   viewer.hidden = false;
   viewer.querySelector('[data-log-frame]').src = link.href;
 });
