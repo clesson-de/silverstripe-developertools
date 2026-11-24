@@ -7,6 +7,7 @@ namespace Clesson\Silverstripe\DeveloperTools\HealthChecks;
 use Clesson\Silverstripe\DeveloperTools\Constants\HealthStatus as S;
 use Clesson\Silverstripe\DeveloperTools\Services\HealthReport;
 use SilverStripe\Control\Director;
+use SilverStripe\Core\Environment;
 
 /**
  * Local observations do not claim to verify external webserver access controls.
@@ -25,7 +26,7 @@ class RuntimeHealthCheck implements HealthCheck
                 Director::isLive() ? S::OK : S::WARNING,
                 _t(__CLASS__ . '.MODE_MESSAGE', 'Production installations should run in live mode.')),
             $this->transport(),
-            $this->webroot(),
+            $this->defaultAdmin(),
         ];
     }
 
@@ -37,27 +38,19 @@ class RuntimeHealthCheck implements HealthCheck
             $status, _t(__CLASS__ . '.HTTPS_MESSAGE', 'Local request observation only; external TLS and proxy configuration are not verified.'));
     }
 
-    /** Detects locally visible sensitive paths without reading or publishing their contents. */
-    private function webroot(): array
+    /** Flags default admin credentials in live mode to avoid known shared secrets. */
+    private function defaultAdmin(): array
     {
-        $public = Director::publicFolder();
-        if (!is_dir($public)) {
-            return HealthReport::singleton()->result('runtime.webroot', _t(__CLASS__ . '.WEBROOT', 'Public webroot separation'),
-                S::UNKNOWN, _t(__CLASS__ . '.WEBROOT_MISSING', 'The configured public directory is not available.'));
-        }
-        return HealthReport::singleton()->result('runtime.webroot', _t(__CLASS__ . '.WEBROOT', 'Public webroot separation'),
-            $this->webrootStatus($public), _t(__CLASS__ . '.WEBROOT_MESSAGE', 'Checks local webroot separation and sensitive paths, not HTTP access protection.'));
-    }
-
-    /** Flags sensitive paths locally without claiming external accessibility. */
-    private function webrootStatus(string $public): string
-    {
-        $status = realpath($public) === realpath(Director::baseFolder()) ? S::ERROR : S::OK;
-        foreach (['.env', '.git', 'composer.json', 'composer.lock', 'vendor', 'app/src'] as $path) {
-            if (file_exists($public . '/' . $path) || is_link($public . '/' . $path)) {
-                $status = S::ERROR;
-            }
-        }
-        return $status;
+        $username = trim((string) Environment::getEnv('SS_DEFAULT_ADMIN_USERNAME'));
+        $password = trim((string) Environment::getEnv('SS_DEFAULT_ADMIN_PASSWORD'));
+        $risky = Director::isLive() && $username !== '' && $password !== '';
+        return HealthReport::singleton()->result(
+            'runtime.default_admin',
+            _t(__CLASS__ . '.DEFAULT_ADMIN', 'Default admin credentials'),
+            $risky ? S::WARNING : S::OK,
+            $risky
+                ? _t(__CLASS__ . '.DEFAULT_ADMIN_WARNING', 'Default admin credentials are configured in live mode. Remove SS_DEFAULT_ADMIN_USERNAME and SS_DEFAULT_ADMIN_PASSWORD.')
+                : _t(__CLASS__ . '.DEFAULT_ADMIN_OK', 'No default admin credentials are active in live mode.')
+        );
     }
 }

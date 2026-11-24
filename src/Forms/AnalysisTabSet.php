@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Clesson\Silverstripe\DeveloperTools\Forms;
 
+use Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin;
 use Clesson\Silverstripe\DeveloperTools\Constants\ProjectInformationField;
 use Clesson\Silverstripe\DeveloperTools\Helpers\ComposerLockReader;
 use Clesson\Silverstripe\DeveloperTools\Helpers\RoutesReader;
 use Clesson\Silverstripe\DeveloperTools\Services\ProjectInformationService;
-use Clesson\Silverstripe\DeveloperTools\Services\HealthCheckService;
-use Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer;
 use SilverStripe\Control\Director;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig;
@@ -66,8 +65,31 @@ class AnalysisTabSet
             _t(__CLASS__ . '.ENVIRONMENT', 'Environment'),
             Director::isLive() ? 'LIVE' : 'DEV'
         ));
-        $tab->push(LiteralField::create('SystemHealth',
-            HealthReportRenderer::create()->render(HealthCheckService::singleton()->collect())));
+        $admin = DeveloperToolsAdmin::singleton();
+        $tab->push(LiteralField::create('SystemHealthWidget', sprintf(
+            '<section class="developer-tools-analysis" data-analysis data-analysis-run-url="%s" data-analysis-execute-url="%s" data-analysis-status-url="%s" data-analysis-report-url="%s" data-analysis-print-url="%s" data-analysis-loading="%s" data-analysis-failure="%s">'
+            . '<h3>%s</h3>'
+            . '<div class="developer-tools-analysis__actions">'
+            . '<button type="button" class="btn btn-primary" data-analysis-run>%s</button>'
+            . '<button type="button" class="btn btn-secondary" data-analysis-print disabled>%s</button>'
+            . '<span class="developer-tools-analysis__status" data-analysis-status aria-live="polite"></span>'
+            . '</div>'
+            . '<div class="developer-tools-analysis__progress" data-analysis-progress hidden>'
+            . '<div class="developer-tools-analysis__progress-bar"></div>'
+            . '</div>'
+            . '<div class="developer-tools-analysis__result" data-analysis-result></div>'
+            . '</section>',
+            htmlspecialchars($admin->Link('runAnalysis'), ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($admin->Link('analysisExecute'), ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($admin->Link('analysisStatus'), ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($admin->Link('analysisReport'), ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($admin->Link('analysisPdf'), ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars(_t(__CLASS__ . '.ANALYSIS_LOADING', 'Analysis is running...'), ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars(_t(__CLASS__ . '.ANALYSIS_FAILURE', 'Analysis failed. Please retry.'), ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars(_t(__CLASS__ . '.ANALYSIS_TITLE', 'System health analysis'), ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars(_t(__CLASS__ . '.ANALYSIS_RUN', 'Start analysis'), ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars(_t(__CLASS__ . '.ANALYSIS_PRINT', 'Print report'), ENT_QUOTES, 'UTF-8')
+        )));
         return $tab;
     }
 

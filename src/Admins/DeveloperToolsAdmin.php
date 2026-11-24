@@ -9,11 +9,15 @@ use Clesson\Silverstripe\DeveloperTools\Constants\MonitoringStatus;
 use Clesson\Silverstripe\DeveloperTools\Models\DeveloperToolsConfig;
 use Clesson\Silverstripe\DeveloperTools\Models\MonitoredWebsite;
 use Clesson\Silverstripe\DeveloperTools\Services\MonitoringCheckService;
+use Clesson\Silverstripe\DeveloperTools\Services\HealthCheckService;
+use Clesson\Silverstripe\DeveloperTools\Services\AnalysisPdfRenderer;
+use Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer;
 use Clesson\Silverstripe\DeveloperTools\Services\MonitoringTableRenderer;
 use Clesson\Silverstripe\DeveloperTools\Services\ProjectInformationService;
 use Clesson\Silverstripe\DeveloperTools\Services\ProjectLogReader;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
+use Throwable;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Admin\SingleRecordAdmin;
 use SilverStripe\Control\HTTPResponse;
@@ -60,12 +64,23 @@ class DeveloperToolsAdmin extends SingleRecordAdmin
     /** @config */
     private static array $allowed_actions = [
         'projectInformationPanel',
+        'analysisReport',
+        'analysisStatus',
+        'analysisExecute',
+        'analysisPrint',
+        'analysisPdf',
+        'runAnalysis',
         'monitoringDetails',
         'monitoringCheck',
         'monitoringWebsitesPanel',
         'logContent',
         'resetLogContent',
     ];
+
+    private const ANALYSIS_SESSION_KEY = 'developer-tools.analysis.latest';
+    private const ANALYSIS_MAX_SNAPSHOTS = 10;
+    private const ANALYSIS_RUNS_SESSION_KEY = 'developer-tools.analysis.runs';
+    private const ANALYSIS_MAX_RUNS = 25;
 
     /**
      * Only administrators may access the editor and its dashboard panel.
@@ -160,6 +175,263 @@ class DeveloperToolsAdmin extends SingleRecordAdmin
         return HTTPResponse::create((string) $html)
             ->addHeader('Content-Type', 'text/html; charset=utf-8')
             ->addHeader('Cache-Control', 'private, no-store');
+    }
+
+    /** Returns the latest cached analysis report HTML for this CMS session. */
+    public function analysisReport(HTTPRequest $request): HTTPResponse
+    {
+        if (!$this->canView()) {
+            return HTTPResponse::create('', 403);
+        }
+        $cached = $this->analysisSnapshot($request, (string) $request->getVar('id'));
+        $payload = [
+            'result_id' => is_array($cached) && isset($cached['id']) ? (string) $cached['id'] : '',
+            'html' => is_array($cached) && isset($cached['html']) ? (string) $cached['html'] : '',
+            'generated_at' => is_array($cached) && isset($cached['generated_at']) ? (string) $cached['generated_at'] : '',
+        ];
+        return HTTPResponse::create(json_encode($payload, JSON_THROW_ON_ERROR))
+            ->addHeader('Content-Type', 'application/json; charset=utf-8')
+            ->addHeader('Cache-Control', 'private, no-store');
+    }
+
+    /** Returns a printable snapshot page for a previously generated analysis result. */
+    public function analysisPrint(HTTPRequest $request): HTTPResponse
+    {
+        if (!$this->canView()) {
+            return HTTPResponse::create('', 403);
+        }
+        $cached = $this->analysisSnapshot($request, (string) $request->getVar('id'));
+        if (!is_array($cached) || !isset($cached['html'])) {
+            return HTTPResponse::create('', 404)->addHeader('Cache-Control', 'private, no-store');
+        }
+        $title = _t(__CLASS__ . '.ANALYSIS_PRINT_TITLE', 'System health report');
+        $html = sprintf(
+            '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>%s</title></head><body>%s</body></html>',
+            htmlspecialchars($title, ENT_QUOTES, 'UTF-8'),
+            (string) $cached['html']
+        );
+        return HTTPResponse::create($html)
+            ->addHeader('Content-Type', 'text/html; charset=utf-8')
+            ->addHeader('Cache-Control', 'private, no-store');
+    }
+
+    /** Returns a PDF file for a previously generated analysis snapshot. */
+    public function analysisPdf(HTTPRequest $request): HTTPResponse
+    {
+        if (!$this->canView()) {
+            return HTTPResponse::create('', 403);
+        }
+        $cached = $this->analysisSnapshot($request, (string) $request->getVar('id'));
+        if (!is_array($cached) || !isset($cached['html'])) {
+            return HTTPResponse::create('', 404)->addHeader('Cache-Control', 'private, no-store');
+        }
+        try {
+            $title = _t(__CLASS__ . '.ANALYSIS_PRINT_TITLE', 'System health report');
+            $generatedAt = isset($cached['generated_at']) ? (string) $cached['generated_at'] : '';
+            if (isset($cached['report']) && is_array($cached['report'])) {
+                $pdf = AnalysisPdfRenderer::create()->renderReport($title, $cached['report'], $generatedAt);
+            } else {
+                $pdf = AnalysisPdfRenderer::create()->render($title, (string) $cached['html'], $generatedAt);
+            }
+            return HTTPResponse::create($pdf)
+                ->addHeader('Content-Type', 'application/pdf')
+                ->addHeader('Content-Disposition', 'inline; filename="system-health-report.pdf"')
+                ->addHeader('Cache-Control', 'private, no-store');
+        } catch (Throwable $exception) {
+            Injector::inst()->get(LoggerInterface::class)->error('Unable to render analysis PDF.', ['exception' => $exception]);
+            return HTTPResponse::create(_t(__CLASS__ . '.ANALYSIS_PDF_ERROR', 'The report PDF could not be generated.'), 500)
+                ->addHeader('Cache-Control', 'private, no-store');
+        }
+    }
+
+    /** Returns the status of a previously started analysis run. */
+    public function analysisStatus(HTTPRequest $request): HTTPResponse
+    {
+        if (!$this->canView()) {
+            return HTTPResponse::create('', 403);
+        }
+        $runId = (string) $request->getVar('run_id');
+        if ($runId === '') {
+            return HTTPResponse::create('', 404)->addHeader('Cache-Control', 'private, no-store');
+        }
+        $run = $this->analysisRun($request, $runId);
+        if (!is_array($run)) {
+            return HTTPResponse::create('', 404)->addHeader('Cache-Control', 'private, no-store');
+        }
+        $payload = [
+            'run_id' => $runId,
+            'status' => (string) ($run['status'] ?? 'failed'),
+            'progress' => (int) ($run['progress'] ?? 0),
+            'result_id' => (string) ($run['result_id'] ?? ''),
+            'html' => (string) ($run['html'] ?? ''),
+            'generated_at' => (string) ($run['generated_at'] ?? ''),
+            'error' => (string) ($run['error'] ?? ''),
+        ];
+        return HTTPResponse::create(json_encode($payload, JSON_THROW_ON_ERROR))
+            ->addHeader('Content-Type', 'application/json; charset=utf-8')
+            ->addHeader('Cache-Control', 'private, no-store');
+    }
+
+    /** Runs analysis on demand and stores the report snapshot in this CMS session. */
+    public function runAnalysis(HTTPRequest $request): HTTPResponse
+    {
+        if (!$this->canView()) {
+            return HTTPResponse::create('', 403);
+        }
+        if ($request->httpMethod() !== 'POST') {
+            return HTTPResponse::create('', 405)->addHeader('Allow', 'POST');
+        }
+        if (!SecurityToken::inst()->checkRequest($request)) {
+            return HTTPResponse::create('', 403);
+        }
+        $runId = bin2hex(random_bytes(12));
+        $this->storeAnalysisRun($request, [
+            'id' => $runId,
+            'status' => 'queued',
+            'progress' => 0,
+            'result_id' => '',
+            'html' => '',
+            'generated_at' => '',
+            'error' => '',
+            'started_at' => time(),
+        ]);
+        return HTTPResponse::create(json_encode([
+            'run_id' => $runId,
+            'status' => 'queued',
+        ], JSON_THROW_ON_ERROR), 202)
+            ->addHeader('Content-Type', 'application/json; charset=utf-8')
+            ->addHeader('Cache-Control', 'private, no-store');
+    }
+
+    /** Executes a previously queued analysis run. */
+    public function analysisExecute(HTTPRequest $request): HTTPResponse
+    {
+        if (!$this->canView()) {
+            return HTTPResponse::create('', 403);
+        }
+        if ($request->httpMethod() !== 'POST') {
+            return HTTPResponse::create('', 405)->addHeader('Allow', 'POST');
+        }
+        if (!SecurityToken::inst()->checkRequest($request)) {
+            return HTTPResponse::create('', 403);
+        }
+        $runId = (string) $request->postVar('run_id');
+        if ($runId === '') {
+            return HTTPResponse::create('', 404)->addHeader('Cache-Control', 'private, no-store');
+        }
+        $run = $this->analysisRun($request, $runId);
+        if (!is_array($run)) {
+            return HTTPResponse::create('', 404)->addHeader('Cache-Control', 'private, no-store');
+        }
+        if (($run['status'] ?? '') === 'done' || ($run['status'] ?? '') === 'failed') {
+            return HTTPResponse::create('', 204)->addHeader('Cache-Control', 'private, no-store');
+        }
+        $run['status'] = 'running';
+        $run['progress'] = 25;
+        $this->storeAnalysisRun($request, $run);
+        $this->completeAnalysisRun($request, $run);
+        return HTTPResponse::create('', 202)->addHeader('Cache-Control', 'private, no-store');
+    }
+
+    /** @return array{id: string, html: string, generated_at: string, report?: array<int, array<string, string>>}|null */
+    private function analysisSnapshot(HTTPRequest $request, string $id = ''): ?array
+    {
+        $cache = $request->getSession()->get(self::ANALYSIS_SESSION_KEY);
+        if (!is_array($cache) || !isset($cache['items']) || !is_array($cache['items'])) {
+            return null;
+        }
+        if ($id !== '' && isset($cache['items'][$id]) && is_array($cache['items'][$id])) {
+            return $cache['items'][$id];
+        }
+        $latest = $cache['latest'] ?? '';
+        return is_string($latest) && isset($cache['items'][$latest]) && is_array($cache['items'][$latest])
+            ? $cache['items'][$latest]
+            : null;
+    }
+
+    /** @param array{id: string, html: string, generated_at: string, report?: array<int, array<string, string>>} $snapshot */
+    private function storeAnalysisSnapshot(HTTPRequest $request, array $snapshot): void
+    {
+        $session = $request->getSession();
+        $cache = $session->get(self::ANALYSIS_SESSION_KEY);
+        if (!is_array($cache) || !isset($cache['items']) || !is_array($cache['items'])) {
+            $cache = ['latest' => '', 'items' => [], 'order' => []];
+        }
+        $cache['items'][$snapshot['id']] = $snapshot;
+        $order = array_values(array_filter((array) ($cache['order'] ?? []), static fn($value): bool => is_string($value)));
+        $order = array_values(array_filter($order, static fn(string $value): bool => $value !== $snapshot['id']));
+        $order[] = $snapshot['id'];
+        while (count($order) > self::ANALYSIS_MAX_SNAPSHOTS) {
+            $remove = array_shift($order);
+            if ($remove !== null) {
+                unset($cache['items'][$remove]);
+            }
+        }
+        $cache['latest'] = $snapshot['id'];
+        $cache['order'] = $order;
+        $session->set(self::ANALYSIS_SESSION_KEY, $cache);
+    }
+
+    /** @return array<string, mixed>|null */
+    private function analysisRun(HTTPRequest $request, string $runId): ?array
+    {
+        $cache = $request->getSession()->get(self::ANALYSIS_RUNS_SESSION_KEY);
+        if (!is_array($cache) || !isset($cache['items']) || !is_array($cache['items'])) {
+            return null;
+        }
+        return isset($cache['items'][$runId]) && is_array($cache['items'][$runId])
+            ? $cache['items'][$runId]
+            : null;
+    }
+
+    /** @param array<string, mixed> $run @return array<string, mixed> */
+    private function completeAnalysisRun(HTTPRequest $request, array $run): array
+    {
+        try {
+            $id = bin2hex(random_bytes(12));
+            $report = HealthCheckService::singleton()->collect();
+            $html = HealthReportRenderer::create()->render($report);
+            $snapshot = ['id' => $id, 'html' => $html, 'generated_at' => gmdate('Y-m-d\TH:i:s\Z'), 'report' => $report];
+            $this->storeAnalysisSnapshot($request, $snapshot);
+            $run['status'] = 'done';
+            $run['progress'] = 100;
+            $run['result_id'] = $snapshot['id'];
+            $run['html'] = $snapshot['html'];
+            $run['generated_at'] = $snapshot['generated_at'];
+            $run['error'] = '';
+        } catch (Throwable $exception) {
+            Injector::inst()->get(LoggerInterface::class)->error('Unable to run analysis.', ['exception' => $exception]);
+            $run['status'] = 'failed';
+            $run['progress'] = 100;
+            $run['result_id'] = '';
+            $run['html'] = '';
+            $run['generated_at'] = '';
+            $run['error'] = _t(__CLASS__ . '.ANALYSIS_RUN_ERROR', 'The analysis could not be completed.');
+        }
+        $this->storeAnalysisRun($request, $run);
+        return $run;
+    }
+
+    /** @param array{id: string, status: string, progress: int, result_id: string, html: string, generated_at: string, error: string, started_at?: int} $run */
+    private function storeAnalysisRun(HTTPRequest $request, array $run): void
+    {
+        $session = $request->getSession();
+        $cache = $session->get(self::ANALYSIS_RUNS_SESSION_KEY);
+        if (!is_array($cache) || !isset($cache['items']) || !is_array($cache['items'])) {
+            $cache = ['items' => [], 'order' => []];
+        }
+        $cache['items'][$run['id']] = $run;
+        $order = array_values(array_filter((array) ($cache['order'] ?? []), static fn($value): bool => is_string($value)));
+        $order = array_values(array_filter($order, static fn(string $value): bool => $value !== $run['id']));
+        $order[] = $run['id'];
+        while (count($order) > self::ANALYSIS_MAX_RUNS) {
+            $remove = array_shift($order);
+            if ($remove !== null) {
+                unset($cache['items'][$remove]);
+            }
+        }
+        $cache['order'] = $order;
+        $session->set(self::ANALYSIS_RUNS_SESSION_KEY, $cache);
     }
 
     private function withEnvironmentHint(string $databaseVersion): string

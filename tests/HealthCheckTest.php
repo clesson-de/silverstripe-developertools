@@ -25,6 +25,7 @@ use RuntimeException;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\Email\Email;
+use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use stdClass;
@@ -296,11 +297,41 @@ class HealthCheckTest extends SapphireTest
     /** CLI checks explicitly avoid claiming the external TLS setup has been verified. */
     public function testLocalRuntimeReport(): void
     {
+        $previousUser = Environment::getEnv('SS_DEFAULT_ADMIN_USERNAME');
+        $previousPass = Environment::getEnv('SS_DEFAULT_ADMIN_PASSWORD');
+        Environment::setEnv('SS_DEFAULT_ADMIN_USERNAME', '');
+        Environment::setEnv('SS_DEFAULT_ADMIN_PASSWORD', '');
         $results = HealthReport::create()->normalize((new RuntimeHealthCheck())->run(microtime(true) + 1));
-        $rows = array_column($results, null, 'id');
-        self::assertSame('unknown', $rows['runtime.https']['status']);
-        self::assertStringContainsString('not HTTP', $rows['runtime.webroot']['message']);
-        self::assertCount(3, $rows);
+        try {
+            $rows = array_column($results, null, 'id');
+            self::assertSame('unknown', $rows['runtime.https']['status']);
+            self::assertSame('ok', $rows['runtime.default_admin']['status']);
+            self::assertCount(3, $rows);
+        } finally {
+            Environment::setEnv('SS_DEFAULT_ADMIN_USERNAME', $previousUser);
+            Environment::setEnv('SS_DEFAULT_ADMIN_PASSWORD', $previousPass);
+        }
+    }
+
+    /** Default admin credentials in live mode are explicitly reported as warning. */
+    public function testDefaultAdminCredentialsWarnInLiveMode(): void
+    {
+        $kernel = Injector::inst()->get(Kernel::class);
+        $previousEnv = $kernel->getEnvironment();
+        $previousUser = Environment::getEnv('SS_DEFAULT_ADMIN_USERNAME');
+        $previousPass = Environment::getEnv('SS_DEFAULT_ADMIN_PASSWORD');
+        Environment::setEnv('SS_DEFAULT_ADMIN_USERNAME', 'admin');
+        Environment::setEnv('SS_DEFAULT_ADMIN_PASSWORD', 'secret');
+        try {
+            $kernel->setEnvironment('live');
+            $results = HealthReport::create()->normalize((new RuntimeHealthCheck())->run(microtime(true) + 1));
+            $rows = array_column($results, null, 'id');
+            self::assertSame('warning', $rows['runtime.default_admin']['status']);
+        } finally {
+            $kernel->setEnvironment($previousEnv);
+            Environment::setEnv('SS_DEFAULT_ADMIN_USERNAME', $previousUser);
+            Environment::setEnv('SS_DEFAULT_ADMIN_PASSWORD', $previousPass);
+        }
     }
 
     /** Missing admin sender email is visible while logger and public root checks still pass. */

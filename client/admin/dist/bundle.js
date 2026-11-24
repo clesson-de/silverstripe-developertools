@@ -4,6 +4,160 @@
   const pending = new WeakSet();
   const logTimers = new WeakMap();
 
+  function analysisStatus(widget, text) {
+    const status = widget.querySelector('[data-analysis-status]');
+    if (status) status.textContent = text || '';
+  }
+
+  function analysisBusy(widget, busy) {
+    const button = widget.querySelector('[data-analysis-run]');
+    const progress = widget.querySelector('[data-analysis-progress]');
+    if (button) button.disabled = busy;
+    if (progress) progress.hidden = !busy;
+  }
+
+  function analysisRender(widget, html) {
+    const result = widget.querySelector('[data-analysis-result]');
+    if (result) result.innerHTML = html || '';
+  }
+
+  function analysisResultId(widget, value) {
+    widget.dataset.analysisResultId = value || '';
+    const print = widget.querySelector('[data-analysis-print]');
+    if (print) print.disabled = !value;
+  }
+
+  function analysisLabelTime(value) {
+    if (!value) return '';
+    return value;
+  }
+
+  function loadLatestAnalysis(widget) {
+    const url = widget.dataset.analysisReportUrl;
+    if (!url) return Promise.resolve();
+    return fetch(url, { credentials: 'same-origin', redirect: 'error' })
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      })
+      .then((payload) => {
+        analysisResultId(widget, payload.result_id || '');
+        analysisRender(widget, payload.html || '');
+        analysisStatus(widget, payload.generated_at ? analysisLabelTime(payload.generated_at) : '');
+      })
+      .catch(() => {
+        analysisResultId(widget, '');
+        analysisStatus(widget, '');
+      });
+  }
+
+  function analysisPoll(widget, runId, loading, failure) {
+    const statusUrl = widget.dataset.analysisStatusUrl;
+    if (!statusUrl || !runId) return Promise.reject(new Error(failure));
+    const maxAttempts = 120;
+    const waitMs = Number.parseInt(widget.dataset.analysisPollMs || '400', 10) || 400;
+    const request = (attempt) => {
+      const separator = statusUrl.includes('?') ? '&' : '?';
+      return fetch(`${statusUrl}${separator}run_id=${encodeURIComponent(runId)}`, {
+        credentials: 'same-origin',
+        redirect: 'error',
+      }).then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      }).then((payload) => {
+        const progress = Number.isInteger(payload.progress) ? payload.progress : 0;
+        if (payload.status === 'queued' || payload.status === 'running') {
+          analysisStatus(widget, `${loading} ${progress}%`);
+          if (attempt >= maxAttempts) throw new Error('Timeout');
+          return new Promise((resolve) => setTimeout(resolve, waitMs)).then(() => request(attempt + 1));
+        }
+        if (payload.status === 'failed') {
+          throw new Error(payload.error || failure);
+        }
+        return payload;
+      });
+    };
+    return request(0);
+  }
+
+  function initAnalysisWidgets() {
+    document.querySelectorAll('[data-analysis]').forEach((widget) => {
+      if (widget.dataset.analysisReady === 'true') return;
+      widget.dataset.analysisReady = 'true';
+      loadLatestAnalysis(widget);
+    });
+  }
+
+  document.addEventListener('click', (event) => {
+    if (!(event.target instanceof Element)) return;
+    const print = event.target.closest('[data-analysis-print]');
+    if (print) {
+      event.preventDefault();
+      event.stopPropagation();
+      const widget = print.closest('[data-analysis]');
+      const id = widget?.dataset.analysisResultId || '';
+      const url = widget?.dataset.analysisPrintUrl || '';
+      if (!id || !url) return;
+      window.open(`${url}?id=${encodeURIComponent(id)}`, '_blank', 'noopener');
+      return;
+    }
+    const run = event.target.closest('[data-analysis-run]');
+    if (!run) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const widget = run.closest('[data-analysis]');
+    const token = run.closest('form')?.querySelector('[name="SecurityID"]');
+    if (!widget || run.disabled || !token?.value || !widget.dataset.analysisRunUrl) return;
+    const loading = widget.dataset.analysisLoading || 'Loading...';
+    const failure = widget.dataset.analysisFailure || 'Request failed.';
+    analysisBusy(widget, true);
+    analysisResultId(widget, '');
+    analysisStatus(widget, loading);
+    const data = new URLSearchParams({ SecurityID: token.value });
+    fetch(widget.dataset.analysisRunUrl, {
+      method: 'POST', body: data, credentials: 'same-origin', redirect: 'error',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+    }).then((response) => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    }).then((payload) => {
+      if (payload.run_id && widget.dataset.analysisExecuteUrl) {
+        const executeData = new URLSearchParams({ SecurityID: token.value, run_id: payload.run_id });
+        fetch(widget.dataset.analysisExecuteUrl, {
+          method: 'POST',
+          body: executeData,
+          credentials: 'same-origin',
+          redirect: 'error',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        }).catch(() => {
+          // Polling remains the source of truth for completion and errors.
+        });
+      }
+      if (payload.run_id && widget.dataset.analysisStatusUrl) {
+        return analysisPoll(widget, payload.run_id, loading, failure);
+      }
+      if (payload.status === 'failed') {
+        throw new Error(payload.error || failure);
+      }
+      return payload;
+    }).then((payload) => {
+      analysisResultId(widget, payload.result_id || '');
+      analysisRender(widget, payload.html || '');
+      analysisStatus(widget, payload.generated_at ? analysisLabelTime(payload.generated_at) : '');
+    }).catch((error) => {
+      analysisStatus(widget, `${failure} (${error.message})`);
+    }).finally(() => {
+      analysisBusy(widget, false);
+    });
+  });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAnalysisWidgets);
+  } else {
+    initAnalysisWidgets();
+  }
+  document.addEventListener('ajaxComplete', initAnalysisWidgets);
+
   function stopLogTimer(viewer) {
     clearInterval(logTimers.get(viewer));
     logTimers.delete(viewer);
