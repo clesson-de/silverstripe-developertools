@@ -28,7 +28,16 @@ class NodeHealthCheck implements HealthCheck
         }
         if (!$search['complete']) {
             $results[] = HealthReport::singleton()->result('node.discovery', _t(__CLASS__ . '.TITLE', 'Node build requirement'),
-                S::UNKNOWN, _t(__CLASS__ . '.INCOMPLETE', 'The .nvmrc search was incomplete due to limits or unreadable directories.'));
+                S::UNKNOWN, _t(__CLASS__ . '.INCOMPLETE', 'The .nvmrc search was incomplete due to limits or unreadable directories.'), [
+                    'category' => 'runtime.dependencies',
+                    'source' => HealthReport::SOURCE_LOCAL,
+                    'target' => Director::baseFolder(),
+                    'evidence' => 'Node requirement discovery exceeded limits or encountered unreadable paths.',
+                    'impact' => 'Dependency runtime support picture may be incomplete.',
+                    'remediation' => 'Reduce scan complexity or fix permissions for relevant directories.',
+                    'limitations' => 'Bounded local scan by design; does not inspect every path unconditionally.',
+                    'state' => HealthReport::STATE_NOT_TESTABLE,
+                ]);
         }
         return $results;
     }
@@ -49,7 +58,18 @@ class NodeHealthCheck implements HealthCheck
         }
         $relative = preg_replace('/[^\x20-\x7e]|[<>]/', '?', $path);
         $message = substr($relative, 0, 250) . ': ' . $outcome[1];
-        return HealthReport::singleton()->result('node.' . $id, $title, $outcome[0], $message);
+        return HealthReport::singleton()->result('node.' . $id, $title, $outcome[0], $message, [
+            'category' => 'runtime.dependencies',
+            'source' => HealthReport::SOURCE_LOCAL,
+            'target' => substr($relative, 0, 250),
+            'evidence' => $version !== null
+                ? ('Detected declared Node requirement: ' . $version)
+                : 'Node requirement file unreadable, invalid or out of scope.',
+            'impact' => 'Unsupported Node versions can break builds and security update paths.',
+            'remediation' => 'Set a supported Node build version and keep it updated.',
+            'limitations' => 'Assesses declared requirement, not necessarily installed runtime at deploy time.',
+            'state' => $outcome[0] === S::UNKNOWN ? HealthReport::STATE_NOT_TESTABLE : ($outcome[0] === S::WARNING ? HealthReport::STATE_RECOMMENDATION : HealthReport::STATE_PASSED),
+        ]);
     }
 
     /** Resolves symlinks and confines reads to real files within the project root. */

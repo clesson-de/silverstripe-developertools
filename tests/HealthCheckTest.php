@@ -6,6 +6,8 @@ namespace Clesson\Silverstripe\DeveloperTools\Tests;
 
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\HealthCheck;
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\ConfigurationHealthCheck;
+use Clesson\Silverstripe\DeveloperTools\HealthChecks\ExternalTransportHealthCheck;
+use Clesson\Silverstripe\DeveloperTools\HealthChecks\MailDnsHealthCheck;
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\NodeHealthCheck;
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\RuntimeHealthCheck;
 use Clesson\Silverstripe\DeveloperTools\Helpers\NodeRequirementFinder;
@@ -14,7 +16,11 @@ use Clesson\Silverstripe\DeveloperTools\Services\HealthCheckService;
 use Clesson\Silverstripe\DeveloperTools\Services\HealthReport;
 use Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer;
 use Clesson\Silverstripe\DeveloperTools\Services\MonitoringResponse;
+use Clesson\Silverstripe\DeveloperTools\Services\MonitoringRedirectCheck;
 use Clesson\Silverstripe\DeveloperTools\Services\NodeSupportService;
+use Clesson\Silverstripe\DeveloperTools\Services\ExternalCertificateCheck;
+use Clesson\Silverstripe\DeveloperTools\Services\ExternalSecurityHeaderCheck;
+use Clesson\Silverstripe\DeveloperTools\Services\MailDnsCheck;
 use Clesson\Silverstripe\DeveloperTools\Services\ReleaseMetadataClient;
 use DomainException;
 use LogicException;
@@ -97,7 +103,80 @@ class HealthCheckTest extends SapphireTest
         $results = HealthCheckService::create()->collect();
         self::assertSame('project.import', $results[0]['id']);
         self::assertSame('warning', $results[0]['status']);
+        self::assertSame('local', $results[0]['source']);
+        self::assertSame('recommendation', $results[0]['state']);
         self::assertStringContainsString('Import is late.', HealthReportRenderer::create()->render($results));
+    }
+
+    /** External transport checks are collected through the orchestrator without live network calls in tests. */
+    public function testExternalTransportCheckRegistration(): void
+    {
+        $redirect = $this->createMock(MonitoringRedirectCheck::class);
+        $redirect->expects($this->once())->method('check')->willReturn(
+            HealthReport::singleton()->result(MonitoringRedirectCheck::ID, 'HTTP to HTTPS redirect', 'ok', 'Redirect is configured.', [
+                'category' => 'security.transport',
+                'source' => HealthReport::SOURCE_EXTERNAL,
+            ])
+        );
+        Injector::inst()->registerService($redirect, MonitoringRedirectCheck::class);
+
+        $cert = $this->createMock(ExternalCertificateCheck::class);
+        $cert->expects($this->once())->method('check')->willReturn(
+            HealthReport::singleton()->result(ExternalCertificateCheck::ID, 'TLS certificate', 'ok', 'Certificate is valid.', [
+                'category' => 'security.transport',
+                'source' => HealthReport::SOURCE_EXTERNAL,
+            ])
+        );
+        Injector::inst()->registerService($cert, ExternalCertificateCheck::class);
+
+        $headers = $this->createMock(ExternalSecurityHeaderCheck::class);
+        $headers->expects($this->once())->method('check')->willReturn([
+            HealthReport::singleton()->result(ExternalSecurityHeaderCheck::ID_HEADERS, 'Security response headers', 'ok', 'Headers look good.', [
+                'category' => 'security.headers',
+                'source' => HealthReport::SOURCE_EXTERNAL,
+            ]),
+            HealthReport::singleton()->result(ExternalSecurityHeaderCheck::ID_COOKIES, 'Session cookie flags', 'unknown', 'No session cookies observed.', [
+                'category' => 'security.cookies',
+                'source' => HealthReport::SOURCE_EXTERNAL,
+            ]),
+        ]);
+        Injector::inst()->registerService($headers, ExternalSecurityHeaderCheck::class);
+
+        Config::modify()->set(HealthCheckService::class, 'checks', ['external' => ExternalTransportHealthCheck::class]);
+        $results = HealthCheckService::create()->collect();
+        $rows = array_column($results, null, 'id');
+        self::assertArrayHasKey(MonitoringRedirectCheck::ID, $rows);
+        self::assertArrayHasKey(ExternalCertificateCheck::ID, $rows);
+        self::assertArrayHasKey(ExternalSecurityHeaderCheck::ID_HEADERS, $rows);
+        self::assertArrayHasKey(ExternalSecurityHeaderCheck::ID_COOKIES, $rows);
+        self::assertSame('external', $rows[MonitoringRedirectCheck::ID]['source']);
+        self::assertSame('external', $rows[ExternalCertificateCheck::ID]['source']);
+    }
+
+    /** Mail DNS checks run only for configured sender domains and return SPF/DMARC outcomes. */
+    public function testMailDnsCheckRegistration(): void
+    {
+        Config::modify()->set(Email::class, 'admin_email', 'sender@example.test');
+        $mailDns = $this->createMock(MailDnsCheck::class);
+        $mailDns->expects($this->once())->method('checkDomain')->with('example.test')
+            ->willReturn([
+                HealthReport::singleton()->result('mail.spf.123456789abc', 'SPF policy (example.test)', 'ok', 'SPF present.', [
+                    'category' => 'security.mail_dns',
+                    'source' => HealthReport::SOURCE_EXTERNAL,
+                ]),
+                HealthReport::singleton()->result('mail.dmarc.123456789abc', 'DMARC policy (example.test)', 'warning', 'DMARC p=none.', [
+                    'category' => 'security.mail_dns',
+                    'source' => HealthReport::SOURCE_EXTERNAL,
+                ]),
+            ]);
+        Injector::inst()->registerService($mailDns, MailDnsCheck::class);
+
+        Config::modify()->set(HealthCheckService::class, 'checks', ['mail' => MailDnsHealthCheck::class]);
+        $results = HealthCheckService::create()->collect();
+        $rows = array_column($results, null, 'id');
+        self::assertArrayHasKey('mail.spf.123456789abc', $rows);
+        self::assertArrayHasKey('mail.dmarc.123456789abc', $rows);
+        self::assertSame('external', $rows['mail.spf.123456789abc']['source']);
     }
 
     /** Incorrect registrations fail explicitly rather than returning success-shaped results. */
@@ -159,6 +238,7 @@ class HealthCheckTest extends SapphireTest
             [['message' => '<script>']], [['message' => "unsafe\nvalue"]],
             [['message' => str_repeat('a', 1001)]], [['checked_at' => '2026-02-30T12:00:00Z']],
             [['extra' => 'value']], [['checked_at' => 'now']], [['status' => false]],
+            [['source' => 'other']], [['state' => 'complete']], [['category' => 'invalid category']],
         ];
     }
 

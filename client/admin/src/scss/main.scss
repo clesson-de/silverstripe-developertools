@@ -117,6 +117,24 @@
 .monitoring-health--error { color: #8b1515; }
 .monitoring-health--unknown { color: #444; }
 
+.monitoring-health__row--detail {
+  background: #fafbfc;
+
+  th {
+    padding-left: 1.25rem;
+    font-weight: 500;
+  }
+
+  td {
+    font-size: .9375rem;
+  }
+}
+
+.monitoring-health__detail-marker {
+  color: #7d8a98;
+  font-weight: 600;
+}
+
 .monitoring-signal {
   display: inline-flex;
   flex-direction: column;

@@ -7,6 +7,8 @@ namespace Clesson\Silverstripe\DeveloperTools\Services;
 use Clesson\Silverstripe\DeveloperTools\Constants\HealthStatus;
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\HealthCheck;
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\ConfigurationHealthCheck;
+use Clesson\Silverstripe\DeveloperTools\HealthChecks\ExternalTransportHealthCheck;
+use Clesson\Silverstripe\DeveloperTools\HealthChecks\MailDnsHealthCheck;
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\NodeHealthCheck;
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\RuntimeHealthCheck;
 use LogicException;
@@ -28,6 +30,8 @@ class HealthCheckService
     /** @config Trusted check classes; projects may register additional implementations. */
     private static array $checks = [
         'runtime' => RuntimeHealthCheck::class,
+        'external_transport' => ExternalTransportHealthCheck::class,
+        'mail_dns' => MailDnsHealthCheck::class,
         'configuration' => ConfigurationHealthCheck::class,
         'node' => NodeHealthCheck::class,
     ];
@@ -66,6 +70,16 @@ class HealthCheckService
     private function budgetResult(): array
     {
         return HealthReport::singleton()->result('system.budget', _t(__CLASS__ . '.TITLE', 'Healthchecks'),
-            HealthStatus::UNKNOWN, _t(__CLASS__ . '.BUDGET', 'Execution budget exceeded; some checks were not run.'));
+            HealthStatus::UNKNOWN, _t(__CLASS__ . '.BUDGET', 'Execution budget exceeded; some checks were not run.'), [
+                'category' => 'system.execution',
+                'source' => HealthReport::SOURCE_LOCAL,
+                'target' => 'HealthCheckService::collect()',
+                'evidence' => 'Global healthcheck execution budget was exceeded before completion.',
+                'impact' => 'Report is incomplete; unexecuted checks must not be interpreted as passed.',
+                'remediation' => 'Run checks explicitly, adjust scheduling, or split expensive checks.',
+                'limitations' => 'Budget is a cooperative execution bound, not a full isolation sandbox.',
+                'state' => HealthReport::STATE_NOT_TESTABLE,
+                'severity' => 'low',
+            ]);
     }
 }

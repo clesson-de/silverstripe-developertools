@@ -55,7 +55,17 @@ class ConfigurationHealthCheck implements HealthCheck
             $status,
             $status === S::OK
                 ? _t(__CLASS__ . '.LOGGER_OK', 'A PSR logger service is configured.')
-                : _t(__CLASS__ . '.LOGGER_MISSING', 'No PSR logger service is configured.')
+                : _t(__CLASS__ . '.LOGGER_MISSING', 'No PSR logger service is configured.'),
+            [
+                'category' => 'operations.logging',
+                'source' => HealthReport::SOURCE_LOCAL,
+                'target' => 'Injector: ' . LoggerInterface::class,
+                'evidence' => $status === S::OK ? 'Logger service resolved successfully.' : 'Logger service could not be resolved.',
+                'impact' => 'Missing logging reduces incident visibility and troubleshooting quality.',
+                'remediation' => 'Register a PSR logger service in the injector configuration.',
+                'limitations' => 'Resolves service only; does not validate downstream log transport.',
+                'severity' => $status === S::OK ? 'none' : 'medium',
+            ]
         );
     }
 
@@ -69,7 +79,17 @@ class ConfigurationHealthCheck implements HealthCheck
             $configured ? S::OK : S::WARNING,
             $configured
                 ? _t(__CLASS__ . '.SENDER_OK', 'Email admin sender address is configured.')
-                : _t(__CLASS__ . '.SENDER_MISSING', 'Email admin sender address is not configured (Email.admin_email).')
+                : _t(__CLASS__ . '.SENDER_MISSING', 'Email admin sender address is not configured (Email.admin_email).'),
+            [
+                'category' => 'operations.mail',
+                'source' => HealthReport::SOURCE_LOCAL,
+                'target' => 'Config: Email.admin_email',
+                'evidence' => $configured ? 'At least one valid sender address configured.' : 'No valid admin sender address configured.',
+                'impact' => 'Operational emails may fail or use unintended fallback senders.',
+                'remediation' => 'Configure a valid sender address via Email.admin_email.',
+                'limitations' => 'Does not validate DNS/SPF/DMARC deliverability.',
+                'severity' => $configured ? 'none' : 'medium',
+            ]
         );
     }
 
@@ -82,7 +102,17 @@ class ConfigurationHealthCheck implements HealthCheck
                 'config.public_php',
                 _t(__CLASS__ . '.PUBLIC_PHP', 'Public PHP files'),
                 S::UNKNOWN,
-                _t(__CLASS__ . '.PUBLIC_PHP_UNAVAILABLE', 'The configured public directory is not available for inspection.')
+                _t(__CLASS__ . '.PUBLIC_PHP_UNAVAILABLE', 'The configured public directory is not available for inspection.'),
+                [
+                    'category' => 'security.exposure',
+                    'source' => HealthReport::SOURCE_LOCAL,
+                    'target' => 'Public directory',
+                    'evidence' => 'Public directory is missing or not readable.',
+                    'impact' => 'Unable to assess webroot script exposure risk.',
+                    'remediation' => 'Verify public directory path and read permissions.',
+                    'limitations' => 'No remote reachability verification is performed.',
+                    'state' => HealthReport::STATE_NOT_TESTABLE,
+                ]
             );
         }
         $phpFiles = [];
@@ -104,7 +134,16 @@ class ConfigurationHealthCheck implements HealthCheck
                 'config.public_php',
                 _t(__CLASS__ . '.PUBLIC_PHP', 'Public PHP files'),
                 S::OK,
-                _t(__CLASS__ . '.PUBLIC_PHP_OK', 'No PHP files are present in the public root except index.php.')
+                _t(__CLASS__ . '.PUBLIC_PHP_OK', 'No PHP files are present in the public root except index.php.'),
+                [
+                    'category' => 'security.exposure',
+                    'source' => HealthReport::SOURCE_LOCAL,
+                    'target' => $public,
+                    'evidence' => 'No additional .php files detected in public root.',
+                    'impact' => 'Reduces risk of unintended executable entry points in webroot.',
+                    'remediation' => 'Keep executable scripts outside the public root except index.php.',
+                    'limitations' => 'Does not prove unreachable aliases or external server mappings.',
+                ]
             );
         }
         $sample = implode(', ', array_slice($phpFiles, 0, 5));
@@ -115,7 +154,19 @@ class ConfigurationHealthCheck implements HealthCheck
             'config.public_php',
             _t(__CLASS__ . '.PUBLIC_PHP', 'Public PHP files'),
             S::ERROR,
-            _t(__CLASS__ . '.PUBLIC_PHP_FOUND', 'Unexpected PHP files in public root: {files}', ['files' => $sample])
+            _t(__CLASS__ . '.PUBLIC_PHP_FOUND', 'Unexpected PHP files in public root: {files}', ['files' => $sample]),
+            [
+                'category' => 'security.exposure',
+                'source' => HealthReport::SOURCE_LOCAL,
+                'target' => $public,
+                'evidence' => 'Detected files: ' . $sample,
+                'impact' => 'Unexpected public PHP files may expose unreviewed executable endpoints.',
+                'remediation' => 'Remove or relocate these files outside the public root.',
+                'limitations' => 'Presence check only; no file content analysis is performed.',
+                'severity' => 'high',
+                'priority' => 'high',
+                'state' => HealthReport::STATE_PROBLEM,
+            ]
         );
     }
 
@@ -134,12 +185,32 @@ class ConfigurationHealthCheck implements HealthCheck
                 $id,
                 $title,
                 S::UNKNOWN,
-                _t(__CLASS__ . '.PUBLIC_PHP_UNAVAILABLE', 'The configured public directory is not available for inspection.')
+                _t(__CLASS__ . '.PUBLIC_PHP_UNAVAILABLE', 'The configured public directory is not available for inspection.'),
+                [
+                    'category' => 'operations.static_assets',
+                    'source' => HealthReport::SOURCE_LOCAL,
+                    'target' => 'Public directory',
+                    'evidence' => 'Public directory is missing or not readable.',
+                    'impact' => 'Unable to verify presence of expected public control files.',
+                    'remediation' => 'Verify public directory path and read permissions.',
+                    'limitations' => 'No remote HTTP fetch is attempted in this check.',
+                    'state' => HealthReport::STATE_NOT_TESTABLE,
+                ]
             );
         }
         $path = $public . DIRECTORY_SEPARATOR . $filename;
         $exists = is_file($path) || is_link($path);
-        return $report->result($id, $title, $exists ? S::OK : S::WARNING, $exists ? $okMessage : $missingMessage);
+        return $report->result($id, $title, $exists ? S::OK : S::WARNING, $exists ? $okMessage : $missingMessage, [
+            'category' => 'operations.static_assets',
+            'source' => HealthReport::SOURCE_LOCAL,
+            'target' => $path,
+            'evidence' => $exists ? ($filename . ' found in public root.') : ($filename . ' not found in public root.'),
+            'impact' => $exists
+                ? 'Expected control file is available for crawlers/consumers.'
+                : 'Missing control file can reduce indexing or operational transparency.',
+            'remediation' => 'Provide and deploy the file when applicable for this project.',
+            'limitations' => 'Checks local filesystem presence only, not effective external delivery.',
+        ]);
     }
 
     /** @return list<string> */

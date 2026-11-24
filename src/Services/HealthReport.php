@@ -22,8 +22,36 @@ class HealthReport
 
     /** Maximum results in one report. */
     public const MAX_CHECKS = 50;
-    /** Exact result contract. */
-    private const FIELDS = ['id', 'title', 'status', 'message', 'checked_at'];
+    /** Required base contract kept stable for backward compatibility. */
+    private const REQUIRED_FIELDS = ['id', 'title', 'status', 'message', 'checked_at'];
+    /** Optional metadata fields for richer, explicit evidence reporting. */
+    private const OPTIONAL_FIELDS = [
+        'category', 'source', 'state', 'severity', 'priority',
+        'evidence', 'target', 'impact', 'remediation', 'limitations', 'reference',
+    ];
+
+    public const SOURCE_LOCAL = 'local';
+    public const SOURCE_EXTERNAL = 'external';
+    public const SOURCE_MANUAL = 'manual';
+
+    public const STATE_PASSED = 'passed';
+    public const STATE_PROBLEM = 'problem';
+    public const STATE_RECOMMENDATION = 'recommendation';
+    public const STATE_NOT_APPLICABLE = 'not_applicable';
+    public const STATE_NOT_TESTABLE = 'not_testable';
+    public const STATE_FAILED = 'failed';
+
+    private const STATES = [
+        self::STATE_PASSED,
+        self::STATE_PROBLEM,
+        self::STATE_RECOMMENDATION,
+        self::STATE_NOT_APPLICABLE,
+        self::STATE_NOT_TESTABLE,
+        self::STATE_FAILED,
+    ];
+    private const SOURCES = [self::SOURCE_LOCAL, self::SOURCE_EXTERNAL, self::SOURCE_MANUAL];
+    private const SEVERITIES = ['none', 'low', 'medium', 'high', 'critical'];
+    private const PRIORITIES = ['low', 'medium', 'high', 'critical'];
 
     /** Rejects malformed results and duplicate IDs; order does not matter. */
     public function normalize(mixed $results, bool $withCentralCheck = false): array
@@ -45,11 +73,14 @@ class HealthReport
     }
 
     /** Creates a timestamped result using the same validation as remote reports. */
-    public function result(string $id, string $title, string $status, string $message): array
+    public function result(string $id, string $title, string $status, string $message, array $meta = []): array
     {
+        $defaults = $this->metaDefaults($status);
         return $this->row([
             'id' => $id, 'title' => $title, 'status' => $status,
             'message' => $message, 'checked_at' => gmdate('Y-m-d\TH:i:s\Z'),
+            ...$defaults,
+            ...array_intersect_key($meta, array_flip(self::OPTIONAL_FIELDS)),
         ]);
     }
 
@@ -57,14 +88,27 @@ class HealthReport
     private function row(mixed $result): array
     {
         $row = $result instanceof stdClass ? get_object_vars($result) : $result;
-        if (!is_array($row) || count($row) !== count(self::FIELDS) || array_diff(array_keys($row), self::FIELDS)) {
+        if (!is_array($row)) {
             throw new DomainException('Invalid healthcheck fields.');
         }
-        foreach (self::FIELDS as $key) {
+        $allowed = array_merge(self::REQUIRED_FIELDS, self::OPTIONAL_FIELDS);
+        if (array_diff(array_keys($row), $allowed) || array_diff(self::REQUIRED_FIELDS, array_keys($row))) {
+            throw new DomainException('Invalid healthcheck fields.');
+        }
+        $row += $this->metaDefaults((string) ($row['status'] ?? ''));
+        foreach (self::REQUIRED_FIELDS as $key) {
             $this->text($row[$key] ?? null, $key === 'message' ? 1000 : 200);
         }
+        $this->text($row['category'], 80);
+        $this->text($row['source'], 20);
+        $this->text($row['state'], 40);
+        $this->text($row['severity'], 20);
+        $this->text($row['priority'], 20);
+        foreach (['evidence', 'target', 'impact', 'remediation', 'limitations', 'reference'] as $key) {
+            $this->text($row[$key], 500);
+        }
         $this->validateOutcome($row);
-        return array_intersect_key($row, array_flip(self::FIELDS));
+        return array_intersect_key($row, array_flip($allowed));
     }
 
     /** Ensures stable IDs, known outcomes and a real observation time. */
@@ -73,9 +117,50 @@ class HealthReport
         if (!preg_match('/\A[a-z0-9][a-z0-9_.-]{0,99}\z/D', $row['id'])
             || !isset(HealthStatus::options()[$row['status']]) || $row['title'] === ''
             || !$this->validTimestamp($row['checked_at'])
+            || !in_array($row['source'], self::SOURCES, true)
+            || !in_array($row['state'], self::STATES, true)
+            || !in_array($row['severity'], self::SEVERITIES, true)
+            || !in_array($row['priority'], self::PRIORITIES, true)
+            || !preg_match('/\A[a-z0-9][a-z0-9_.-]{0,79}\z/D', $row['category'])
         ) {
             throw new DomainException('Invalid healthcheck outcome.');
         }
+    }
+
+    /** @return array{category: string, source: string, state: string, severity: string, priority: string, evidence: string, target: string, impact: string, remediation: string, limitations: string, reference: string} */
+    private function metaDefaults(string $status): array
+    {
+        $state = match ($status) {
+            HealthStatus::OK => self::STATE_PASSED,
+            HealthStatus::WARNING => self::STATE_RECOMMENDATION,
+            HealthStatus::ERROR => self::STATE_PROBLEM,
+            default => self::STATE_NOT_TESTABLE,
+        };
+        $severity = match ($status) {
+            HealthStatus::OK => 'none',
+            HealthStatus::WARNING => 'medium',
+            HealthStatus::ERROR => 'high',
+            default => 'low',
+        };
+        $priority = match ($status) {
+            HealthStatus::OK => 'low',
+            HealthStatus::WARNING => 'medium',
+            HealthStatus::ERROR => 'high',
+            default => 'low',
+        };
+        return [
+            'category' => 'system.general',
+            'source' => self::SOURCE_LOCAL,
+            'state' => $state,
+            'severity' => $severity,
+            'priority' => $priority,
+            'evidence' => '',
+            'target' => '',
+            'impact' => '',
+            'remediation' => '',
+            'limitations' => '',
+            'reference' => '',
+        ];
     }
 
     /** Allows plain UTF-8 prose without markup or control characters. */

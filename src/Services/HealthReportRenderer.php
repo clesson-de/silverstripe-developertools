@@ -23,7 +23,17 @@ class HealthReportRenderer
     {
         $rows = [];
         foreach (HealthReport::singleton()->normalize($report, true) as $row) {
-            $rows[] = $row + ['label' => HealthStatus::label($row['status'])];
+            $detail = str_contains((string) $row['id'], '.issue.');
+            $group = $detail ? explode('.issue.', (string) $row['id'], 2)[0] : (string) $row['id'];
+            $rows[] = $row + [
+                'label' => HealthStatus::label($row['status']),
+                'state_label' => strtoupper(str_replace('_', ' ', $row['state'] ?? '')),
+                'severity_label' => strtoupper((string) ($row['severity'] ?? '')),
+                'priority_label' => strtoupper((string) ($row['priority'] ?? '')),
+                'is_detail' => $detail,
+                'row_class' => $detail ? 'monitoring-health__row monitoring-health__row--detail' : 'monitoring-health__row',
+                'group_key' => preg_replace('/[^a-z0-9_.-]/i', '', $group) ?? '',
+            ];
         }
         return (string) ArrayData::create([
             'Rows' => $rows,
