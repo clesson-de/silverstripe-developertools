@@ -10,6 +10,7 @@ use Clesson\Silverstripe\DeveloperTools\HealthChecks\ExternalTransportHealthChec
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\MailDnsHealthCheck;
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\NodeHealthCheck;
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\RuntimeHealthCheck;
+use Clesson\Silverstripe\DeveloperTools\HealthChecks\VersionSupportHealthCheck;
 use Clesson\Silverstripe\DeveloperTools\Helpers\NodeRequirementFinder;
 use Clesson\Silverstripe\DeveloperTools\Models\MonitoringCheck;
 use Clesson\Silverstripe\DeveloperTools\Services\HealthCheckService;
@@ -21,7 +22,9 @@ use Clesson\Silverstripe\DeveloperTools\Services\NodeSupportService;
 use Clesson\Silverstripe\DeveloperTools\Services\ExternalCertificateCheck;
 use Clesson\Silverstripe\DeveloperTools\Services\ExternalSecurityHeaderCheck;
 use Clesson\Silverstripe\DeveloperTools\Services\MailDnsCheck;
+use Clesson\Silverstripe\DeveloperTools\Services\ProjectInformationService;
 use Clesson\Silverstripe\DeveloperTools\Services\ReleaseMetadataClient;
+use Clesson\Silverstripe\DeveloperTools\Services\VersionSupportCheck;
 use DomainException;
 use LogicException;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -177,6 +180,46 @@ class HealthCheckTest extends SapphireTest
         self::assertArrayHasKey('mail.spf.123456789abc', $rows);
         self::assertArrayHasKey('mail.dmarc.123456789abc', $rows);
         self::assertSame('external', $rows['mail.spf.123456789abc']['source']);
+    }
+
+    /** Runtime version support checks compare installed/runtime versions via injected support assessor. */
+    public function testVersionSupportCheckRegistration(): void
+    {
+        $information = $this->createMock(ProjectInformationService::class);
+        $information->expects($this->once())->method('getInformation')->willReturn([
+            'php_version' => '8.2.10',
+            'silverstripe_version' => '6.1.0',
+            'database_version' => '10.11.8-MariaDB',
+        ]);
+        $information->expects($this->once())->method('getDatabaseProduct')->willReturn('mariadb');
+        Injector::inst()->registerService($information, ProjectInformationService::class);
+
+        $support = $this->createMock(VersionSupportCheck::class);
+        $support->expects($this->exactly(3))->method('assess')->willReturnOnConsecutiveCalls(
+            [
+                'status' => 'ok',
+                'message' => 'PHP supported.',
+                'meta' => ['category' => 'runtime.php', 'source' => HealthReport::SOURCE_EXTERNAL],
+            ],
+            [
+                'status' => 'warning',
+                'message' => 'Framework update available.',
+                'meta' => ['category' => 'runtime.silverstripe', 'source' => HealthReport::SOURCE_EXTERNAL],
+            ],
+            [
+                'status' => 'error',
+                'message' => 'Database version is end-of-life.',
+                'meta' => ['category' => 'runtime.database', 'source' => HealthReport::SOURCE_EXTERNAL],
+            ]
+        );
+        Injector::inst()->registerService($support, VersionSupportCheck::class);
+
+        Config::modify()->set(HealthCheckService::class, 'checks', ['version' => VersionSupportHealthCheck::class]);
+        $results = HealthCheckService::create()->collect();
+        $rows = array_column($results, null, 'id');
+        self::assertSame('ok', $rows['version.php']['status']);
+        self::assertSame('warning', $rows['version.silverstripe_framework']['status']);
+        self::assertSame('error', $rows['version.database']['status']);
     }
 
     /** Incorrect registrations fail explicitly rather than returning success-shaped results. */

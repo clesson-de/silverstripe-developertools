@@ -128,6 +128,11 @@ de:
   Clesson\Silverstripe\DeveloperTools\HealthChecks\MailDnsHealthCheck:
     TITLE: 'Mail-DNS-Richtlinie'
     UNAVAILABLE: 'Für SPF/DMARC-Prüfungen ist keine konfigurierte Versanddomain vorhanden.'
+  Clesson\Silverstripe\DeveloperTools\HealthChecks\VersionSupportHealthCheck:
+    PHP_TITLE: 'PHP-Versionssupport'
+    SS_TITLE: 'Silverstripe-Framework-Support'
+    DB_TITLE: 'Datenbankserver-Support'
+    DB_UNKNOWN: 'Das Datenbankprodukt ist für offizielle Lifecycle-Prüfungen nicht automatisch bewertbar.'
   Clesson\Silverstripe\DeveloperTools\HealthChecks\NodeHealthCheck:
     INCOMPLETE: 'Die .nvmrc-Suche war wegen eines Limits oder nicht lesbarer Verzeichnisse unvollständig.'
     TITLE: 'Node-Build-Vorgabe'
@@ -190,6 +195,13 @@ de:
     DMARC_OK: 'DMARC ist mit einer durchsetzenden Policy vorhanden.'
     DNS_FAILED: 'DNS-Abfrage für diese Domain ist fehlgeschlagen.'
     BUDGET: 'DNS-Prüfung wurde wegen abgelaufenem Zeitbudget übersprungen.'
+  Clesson\Silverstripe\DeveloperTools\Services\VersionSupportCheck:
+    UNSUPPORTED_FORMAT: 'Das installierte Versionsformat ist nicht bewertbar.'
+    EOL: 'Die installierte Version ist end-of-life und erhält keine Sicherheitsupdates mehr.'
+    UPDATE_SOON_EOL: 'Ein Update ist verfügbar und das Supportende ist zeitnah.'
+    UPDATE: 'Im Vergleich zur neuesten stabilen Version ist ein Update verfügbar.'
+    CURRENT: 'Die installierte Version ist aktuell, ein EOL-Risiko ist derzeit nicht bekannt.'
+    UNKNOWN: 'Offizielle Release- oder Lifecycle-Daten reichen derzeit nicht für einen belastbaren Vergleich aus.'
   Clesson\Silverstripe\DeveloperTools\Services\HealthCheckService:
     TITLE: 'Healthchecks'
     BUDGET: 'Zeitbudget überschritten; einige Prüfungen wurden nicht ausgeführt.'

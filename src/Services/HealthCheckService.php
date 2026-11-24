@@ -11,6 +11,7 @@ use Clesson\Silverstripe\DeveloperTools\HealthChecks\ExternalTransportHealthChec
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\MailDnsHealthCheck;
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\NodeHealthCheck;
 use Clesson\Silverstripe\DeveloperTools\HealthChecks\RuntimeHealthCheck;
+use Clesson\Silverstripe\DeveloperTools\HealthChecks\VersionSupportHealthCheck;
 use LogicException;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
@@ -30,6 +31,7 @@ class HealthCheckService
     /** @config Trusted check classes; projects may register additional implementations. */
     private static array $checks = [
         'runtime' => RuntimeHealthCheck::class,
+        'version_support' => VersionSupportHealthCheck::class,
         'external_transport' => ExternalTransportHealthCheck::class,
         'mail_dns' => MailDnsHealthCheck::class,
         'configuration' => ConfigurationHealthCheck::class,
