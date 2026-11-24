@@ -135,6 +135,22 @@
   color: #444;
 }
 
+.monitoring-health__row--detail {
+  background: #fafbfc;
+}
+.monitoring-health__row--detail th {
+  padding-left: 1.25rem;
+  font-weight: 500;
+}
+.monitoring-health__row--detail td {
+  font-size: 0.9375rem;
+}
+
+.monitoring-health__detail-marker {
+  color: #7d8a98;
+  font-weight: 600;
+}
+
 .monitoring-signal {
   display: inline-flex;
   flex-direction: column;
