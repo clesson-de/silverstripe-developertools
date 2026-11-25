@@ -1,0 +1,20 @@
+da:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Udviklervarktojer'
+    ENVIRONMENT: 'Miljo'
+    ANALYSIS_PRINT_TITLE: 'Rapport om systemstatus'
+    ANALYSIS_RUN_ERROR: 'Analysen kunne ikke fuldfores.'
+    ANALYSIS_PDF_ERROR: 'PDF-rapporten kunne ikke genereres.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analyse'
+    TAB_PROJECT_INFORMATION: 'Projektinformation'
+    ENVIRONMENT: 'Miljo'
+    ANALYSIS_TITLE: 'Systemsundhedsanalyse'
+    ANALYSIS_RUN: 'Start analyse'
+    ANALYSIS_PRINT: 'Udskriv rapport'
+    ANALYSIS_LOADING: 'Analyse korer...'
+    ANALYSIS_FAILURE: 'Analysen mislykkedes. Proev igen.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Systemstatus'
+    EMPTY: 'Ingen resultater tilgaengelige for denne koersel.'
+

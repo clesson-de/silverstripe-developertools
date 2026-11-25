@@ -1,0 +1,20 @@
+fa_IR:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Abzarhaye Tosee'
+    ENVIRONMENT: 'Mohit'
+    ANALYSIS_PRINT_TITLE: 'Gozaresh vaziyat system'
+    ANALYSIS_RUN_ERROR: 'Tahlil takmil nashod.'
+    ANALYSIS_PDF_ERROR: 'Sakht PDF gozaresh momken nashod.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Tahlil'
+    TAB_PROJECT_INFORMATION: 'Etelaate project'
+    ENVIRONMENT: 'Mohit'
+    ANALYSIS_TITLE: 'Tahlil salamat system'
+    ANALYSIS_RUN: 'Shoru tahlil'
+    ANALYSIS_PRINT: 'Chap gozaresh'
+    ANALYSIS_LOADING: 'Tahlil dar hal ejra...'
+    ANALYSIS_FAILURE: 'Tahlil namovafagh bud. Dobare talash konid.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Vaziyat system'
+    EMPTY: 'Baraye in ejra natijei mojood nist.'
+

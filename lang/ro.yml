@@ -1,0 +1,16 @@
+ro:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Instrumente dezvoltator'
+    ENVIRONMENT: 'Mediu'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analiza'
+    TAB_PROJECT_INFORMATION: 'Informatii proiect'
+    ANALYSIS_TITLE: 'Analiza starii sistemului'
+    ANALYSIS_RUN: 'Porneste analiza'
+    ANALYSIS_PRINT: 'Tipareste raport'
+    ANALYSIS_LOADING: 'Analiza ruleaza...'
+    ANALYSIS_FAILURE: 'Analiza a esuat. Incercati din nou.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Starea sistemului'
+    EMPTY: 'Nu exista rezultate pentru aceasta rulare.'
+

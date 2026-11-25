@@ -1,0 +1,20 @@
+es_AR:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Developer Tools'
+    ENVIRONMENT: 'Entorno'
+    ANALYSIS_PRINT_TITLE: 'Informe del estado del sistema'
+    ANALYSIS_RUN_ERROR: 'No se pudo completar el analisis.'
+    ANALYSIS_PDF_ERROR: 'No se pudo generar el informe PDF.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analisis'
+    TAB_PROJECT_INFORMATION: 'Informacion del proyecto'
+    ENVIRONMENT: 'Entorno'
+    ANALYSIS_TITLE: 'Analisis de salud del sistema'
+    ANALYSIS_RUN: 'Iniciar analisis'
+    ANALYSIS_PRINT: 'Imprimir informe'
+    ANALYSIS_LOADING: 'Analisis en ejecucion...'
+    ANALYSIS_FAILURE: 'Analisis fallido. Volve a intentarlo.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Estado del sistema'
+    EMPTY: 'No hay resultados disponibles para esta corrida.'
+

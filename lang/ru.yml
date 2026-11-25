@@ -1,0 +1,57 @@
+ru:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Developer Tools'
+    ENVIRONMENT: 'Sreda'
+    ANALYSIS_PRINT_TITLE: 'Otchet o sostoyanii sistemy'
+    ANALYSIS_RUN_ERROR: 'Ne udalos zavershit analiz.'
+    ANALYSIS_PDF_ERROR: 'Ne udalos sozdat PDF-otchet.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analiz'
+    TAB_PROJECT_INFORMATION: 'Informatsiya o proekte'
+    ENVIRONMENT: 'Sreda'
+    ANALYSIS_TITLE: 'Analiz sostoyaniya sistemy'
+    ANALYSIS_RUN: 'Zapustit analiz'
+    ANALYSIS_PRINT: 'Pechat otcheta'
+    ANALYSIS_LOADING: 'Analiz vypolnyaetsya...'
+    ANALYSIS_FAILURE: 'Sboy analiza. Popytaites snova.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Sostoyanie sistemy'
+    EMPTY: 'Dlya etogo zapuska net rezultatov proverki.'
+  Clesson\Silverstripe\DeveloperTools\Services\AnalysisPdfRenderer:
+    LEGEND: 'Legenda: OSHIBKA={error}, PREDEUPREZHDENIE={warning}, NEIZVESTNO={unknown}, OK={ok}'
+  Clesson\Silverstripe\DeveloperTools\Constants\HealthStatus:
+    OK: 'OK'
+    WARNING: 'Preduprezhdenie'
+    ERROR: 'Oshibka'
+    UNKNOWN: 'Ne otsenivaetsya'
+  Clesson\Silverstripe\DeveloperTools\HealthChecks\VersionSupportHealthCheck:
+    PHP_TITLE: 'Podderzhka versii PHP'
+    SS_TITLE: 'Podderzhka framework Silverstripe'
+    DB_TITLE: 'Podderzhka servera bazy dannyh'
+    DB_UNKNOWN: 'Produkt bazy dannyh ne otsenivaetsya dlya ofitsialnyh proverok zhiznennogo cikla.'
+  Clesson\Silverstripe\DeveloperTools\Services\VersionSupportCheck:
+    UNSUPPORTED_FORMAT: 'Format ustanovlennoy versii ne otsenivaetsya.'
+    EOL: 'Ustanovlennaya versiya dostigla EOL i bolshe ne poluchaet ispravleniya bezopasnosti.'
+    UPDATE_SOON_EOL: 'Dostupno obnovlenie, i konec podderzhki blizko.'
+    UPDATE: 'Dostupno obnovlenie po sravneniyu s posledney stabilnoy versiyey.'
+    CURRENT: 'Ustanovlennaya versiya aktualna, risk EOL v dannyy moment ne izvesten.'
+    UNKNOWN: 'Ofitsialnyh dannyh o release ili lifecycle nedostatochno dlya nadezhnogo sravneniya.'
+  Clesson\Silverstripe\DeveloperTools\Services\MailDnsCheck:
+    SPF_TITLE: 'Politika SPF'
+    SPF_DETAIL: 'Detal SPF'
+    SPF_MISSING: 'Dlya etogo domena otpravitelya SPF-zapis ne nayden.'
+    SPF_MULTI: 'Naydeno neskolko SPF-zapisei, otsenka neodnoznachna.'
+    SPF_PLUS_ALL: 'SPF soderzhit +all i fakticheski razreshaet podmenu.'
+    SPF_COMPLEXITY: 'SPF soderzhit potencialno riskovannuyu slozhnost include/redirect i trebuet proverki.'
+    SPF_LOOKUPS: 'SPF, veroyatno, prevyshaet rekomendovannuyu slozhnost DNS-zaprosov.'
+    SPF_OK: 'SPF-zapis prisutstvuet i ne soderzhit yavno kritichnyh patternov.'
+    DMARC_TITLE: 'Politika DMARC'
+    DMARC_DETAIL: 'Detal DMARC'
+    DMARC_MISSING: 'Dlya etogo domena otpravitelya DMARC-zapis ne nayden.'
+    DMARC_MULTI: 'Naydeno neskolko DMARC-zapisei, otsenka neodnoznachna.'
+    DMARC_INVALID: 'DMARC-zapis ne soderzhit korrektny tag p=.'
+    DMARC_NONE: 'Politika DMARC p=none - eto tolko monitoring i ne otklonyaet poddelnye pisma.'
+    DMARC_OK: 'DMARC-zapis prisutstvuet s primenyaemoy politikoy.'
+    DNS_FAILED: 'DNS-zapros dlya etogo domena ne udalsya.'
+    BUDGET: 'DNS-proverka propushchena, potomu chto ischerpan byudzhet vypolneniya.'
+

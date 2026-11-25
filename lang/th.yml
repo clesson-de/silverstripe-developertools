@@ -1,0 +1,16 @@
+th:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Developer Tools'
+    ENVIRONMENT: 'Sapphawadlom'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Wikhro'
+    TAB_PROJECT_INFORMATION: 'Khommun Khrongkan'
+    ANALYSIS_TITLE: 'Kan wikhro sukkhaphap rabop'
+    ANALYSIS_RUN: 'Rim ton wikhro'
+    ANALYSIS_PRINT: 'Phim raingan'
+    ANALYSIS_LOADING: 'Kamlang wikhro...'
+    ANALYSIS_FAILURE: 'Kan wikhro lomleo. Karuna long mai.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Sathanah rabop'
+    EMPTY: 'Mai mi phonlap samrap kan run ni.'
+

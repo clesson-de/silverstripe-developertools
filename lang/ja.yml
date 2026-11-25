@@ -1,0 +1,16 @@
+ja:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Developer Tools'
+    ENVIRONMENT: 'Kankyo'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Bunseki'
+    TAB_PROJECT_INFORMATION: 'Purojekuto Joho'
+    ANALYSIS_TITLE: 'Shisutemu Kenko Bunseki'
+    ANALYSIS_RUN: 'Bunseki Kaishi'
+    ANALYSIS_PRINT: 'Hokokusho Insatsu'
+    ANALYSIS_LOADING: 'Bunseki Chuu...'
+    ANALYSIS_FAILURE: 'Bunseki ni shippai shimashita. Mou ichido.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Shisutemu Jotai'
+    EMPTY: 'Kono jikko no kekka wa arimasen.'
+

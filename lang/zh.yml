@@ -1,0 +1,59 @@
+zh:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Kaifa Gongju'
+    ENVIRONMENT: 'Huanjing'
+    ANALYSIS_PRINT_TITLE: 'Xitong Zhuangtai Baogao'
+    ANALYSIS_RUN_ERROR: 'Fenxi wufa wancheng.'
+    ANALYSIS_PDF_ERROR: 'Wufa shengcheng PDF baogao.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Fenxi'
+    TAB_PROJECT_INFORMATION: 'Xiangmu Xinxi'
+    ENVIRONMENT: 'Huanjing'
+    ANALYSIS_TITLE: 'Xitong Jiankang Fenxi'
+    ANALYSIS_RUN: 'Kaishi Fenxi'
+    ANALYSIS_PRINT: 'Dayin Baogao'
+    ANALYSIS_LOADING: 'Fenxi Jinxing Zhong...'
+    ANALYSIS_FAILURE: 'Fenxi shibai, qing chongshi.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Xitong Zhuangtai'
+    EMPTY: 'Ben ci jiancha mei you keyong jieguo.'
+  Clesson\Silverstripe\DeveloperTools\Services\AnalysisPdfRenderer:
+    LEGEND: 'Tuli: ERROR={error}, WARNING={warning}, UNKNOWN={unknown}, OK={ok}'
+  Clesson\Silverstripe\DeveloperTools\Constants\HealthStatus:
+    OK: 'Zhengchang'
+    WARNING: 'Jinggao'
+    ERROR: 'Cuowu'
+    UNKNOWN: 'Buke Pinggu'
+  Clesson\Silverstripe\DeveloperTools\HealthChecks\VersionSupportHealthCheck:
+    PHP_TITLE: 'PHP Banben Zhichi'
+    SS_TITLE: 'Silverstripe Framework Zhichi'
+    DB_TITLE: 'Shuju Ku Fuwuqi Zhichi'
+    DB_UNKNOWN: 'Gai shuju ku chanpin wufa jinxing guanfang shengming zhouqi pinggu.'
+  Clesson\Silverstripe\DeveloperTools\Services\VersionSupportCheck:
+    UNSUPPORTED_FORMAT: 'Yian zhuang banben geshi buke pinggu.'
+    EOL: 'Yian zhuang banben yi daodao EOL, bu zai huode anquan xiufu.'
+    UPDATE_SOON_EOL: 'You ke yong gengxin, qie zhichi jiang jie shu.'
+    UPDATE: 'Yu zuixin wending banben xiangbi you gengxin ke yong.'
+    CURRENT: 'Yian zhuang banben wei zuixin, muqian wei faxian EOL fengxian.'
+    UNKNOWN: 'Guanfang fabu huo shengming zhouqi shuju buzu, wufa kekaobi jiaodui.'
+  Clesson\Silverstripe\DeveloperTools\Services\MailDnsCheck:
+    SPF_TITLE: 'SPF Celue'
+    SPF_DETAIL: 'SPF Xiangqing'
+    SPF_MISSING: 'Ci fasong yuming wei zhaodao SPF jilv.'
+    SPF_MULTI: 'Jiance dao duoge SPF jilv, pinggu jieguo bu mingque.'
+    SPF_PLUS_ALL: 'SPF baohan +all, shiji shang yunxu maoyong.'
+    SPF_COMPLEXITY: 'SPF baohan qianzai fengxian de include/redirect jiegou, jianyi fuhen.'
+    SPF_LOOKUPS: 'SPF keneng chaoguo tuijian DNS chaxun fuzadu.'
+    SPF_OK: 'SPF jilv cunzai, wei faxian liji guanjian fengxian.'
+    DMARC_TITLE: 'DMARC Celue'
+    DMARC_DETAIL: 'DMARC Xiangqing'
+    DMARC_MISSING: 'Ci fasong yuming wei zhaodao DMARC jilv.'
+    DMARC_MULTI: 'Jiance dao duoge DMARC jilv, pinggu jieguo bu mingque.'
+    DMARC_INVALID: 'DMARC jilv queshao youxiao de p= biaoqian.'
+    DMARC_NONE: 'DMARC p=none jin yongyu jiankong, bu hui jujue weizao youjian.'
+    DMARC_OK: 'DMARC jilv cunzai qie wei qiangzhi celue.'
+    DNS_FAILED: 'Gai yuming de DNS chaxun shibai.'
+    BUDGET: 'Yinzhi zhixing yusuan chaoshi, yi tiaoguo DNS jiancha.'
+
+
+

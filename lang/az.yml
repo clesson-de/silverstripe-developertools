@@ -1,0 +1,20 @@
+az:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Developer Alatlari'
+    ENVIRONMENT: 'Muhit'
+    ANALYSIS_PRINT_TITLE: 'Sistem veziyyeti hesabatı'
+    ANALYSIS_RUN_ERROR: 'Analizi tamamlamaq mumkun olmadi.'
+    ANALYSIS_PDF_ERROR: 'PDF hesabatı yaratmaq mumkun olmadi.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analiz'
+    TAB_PROJECT_INFORMATION: 'Layihe melumatlari'
+    ENVIRONMENT: 'Muhit'
+    ANALYSIS_TITLE: 'Sistem saglamligi analizi'
+    ANALYSIS_RUN: 'Analizi baslat'
+    ANALYSIS_PRINT: 'Hesabatı cap et'
+    ANALYSIS_LOADING: 'Analiz gedir...'
+    ANALYSIS_FAILURE: 'Analiz ugursuz oldu. Yeniden cehd edin.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Sistem veziyyeti'
+    EMPTY: 'Bu yoxlama ucun netice movcud deyil.'
+

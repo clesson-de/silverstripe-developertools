@@ -1,0 +1,57 @@
+pl:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Developer Tools'
+    ENVIRONMENT: 'Srodowisko'
+    ANALYSIS_PRINT_TITLE: 'Raport stanu systemu'
+    ANALYSIS_RUN_ERROR: 'Nie udalo sie zakonczyc analizy.'
+    ANALYSIS_PDF_ERROR: 'Nie udalo sie wygenerowac raportu PDF.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analiza'
+    TAB_PROJECT_INFORMATION: 'Informacje o projekcie'
+    ENVIRONMENT: 'Srodowisko'
+    ANALYSIS_TITLE: 'Analiza stanu systemu'
+    ANALYSIS_RUN: 'Rozpocznij analize'
+    ANALYSIS_PRINT: 'Drukuj raport'
+    ANALYSIS_LOADING: 'Analiza trwa...'
+    ANALYSIS_FAILURE: 'Analiza nie powiodla sie. Sprobuj ponownie.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Stan systemu'
+    EMPTY: 'Brak wynikow kontroli dla tego uruchomienia.'
+  Clesson\Silverstripe\DeveloperTools\Services\AnalysisPdfRenderer:
+    LEGEND: 'Legenda: BLAD={error}, OSTRZEZENIE={warning}, NIEZNANE={unknown}, OK={ok}'
+  Clesson\Silverstripe\DeveloperTools\Constants\HealthStatus:
+    OK: 'OK'
+    WARNING: 'Ostrzezenie'
+    ERROR: 'Blad'
+    UNKNOWN: 'Nieocenialne'
+  Clesson\Silverstripe\DeveloperTools\HealthChecks\VersionSupportHealthCheck:
+    PHP_TITLE: 'Wsparcie wersji PHP'
+    SS_TITLE: 'Wsparcie frameworka Silverstripe'
+    DB_TITLE: 'Wsparcie serwera bazy danych'
+    DB_UNKNOWN: 'Produkt bazy danych nie jest ocenialny dla oficjalnych kontroli cyklu zycia.'
+  Clesson\Silverstripe\DeveloperTools\Services\VersionSupportCheck:
+    UNSUPPORTED_FORMAT: 'Format zainstalowanej wersji nie jest ocenialny.'
+    EOL: 'Zainstalowana wersja osiagnela EOL i nie otrzymuje juz poprawek bezpieczenstwa.'
+    UPDATE_SOON_EOL: 'Dostepna jest aktualizacja, a koniec wsparcia jest blisko.'
+    UPDATE: 'Dostepna jest aktualizacja wzgledem najnowszej stabilnej wersji.'
+    CURRENT: 'Zainstalowana wersja jest aktualna i obecnie nie ma znanego ryzyka EOL.'
+    UNKNOWN: 'Oficjalne dane o wydaniach lub cyklu zycia sa niewystarczajace do wiarygodnego porownania.'
+  Clesson\Silverstripe\DeveloperTools\Services\MailDnsCheck:
+    SPF_TITLE: 'Polityka SPF'
+    SPF_DETAIL: 'Szczegoly SPF'
+    SPF_MISSING: 'Nie znaleziono rekordu SPF dla tej domeny nadawcy.'
+    SPF_MULTI: 'Znaleziono wiele rekordow SPF, ocena jest niejednoznaczna.'
+    SPF_PLUS_ALL: 'SPF zawiera +all i faktycznie pozwala na spoofing.'
+    SPF_COMPLEXITY: 'SPF zawiera potencjalnie ryzykowna zlozonosc include/redirect i powinien zostac przejrzany.'
+    SPF_LOOKUPS: 'SPF prawdopodobnie przekracza zalecana zlozonosc zapytan DNS.'
+    SPF_OK: 'Rekord SPF jest obecny i nie zawiera bezposrednio krytycznego wzorca.'
+    DMARC_TITLE: 'Polityka DMARC'
+    DMARC_DETAIL: 'Szczegoly DMARC'
+    DMARC_MISSING: 'Nie znaleziono rekordu DMARC dla tej domeny nadawcy.'
+    DMARC_MULTI: 'Znaleziono wiele rekordow DMARC, ocena jest niejednoznaczna.'
+    DMARC_INVALID: 'Rekord DMARC nie zawiera poprawnego tagu p=.'
+    DMARC_NONE: 'Polityka DMARC p=none to tylko monitoring i nie odrzuca sfalszowanych wiadomosci.'
+    DMARC_OK: 'Rekord DMARC jest obecny z egzekwujaca polityka.'
+    DNS_FAILED: 'Zapytanie DNS dla tej domeny nie powiodlo sie.'
+    BUDGET: 'Kontrola DNS zostala pominieta, bo budzet wykonania wygasl.'
+

@@ -1,0 +1,57 @@
+it:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Developer Tools'
+    ENVIRONMENT: 'Ambiente'
+    ANALYSIS_PRINT_TITLE: 'Rapporto sullo stato del sistema'
+    ANALYSIS_RUN_ERROR: 'Impossibile completare l''analisi.'
+    ANALYSIS_PDF_ERROR: 'Impossibile generare il rapporto PDF.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analisi'
+    TAB_PROJECT_INFORMATION: 'Informazioni progetto'
+    ENVIRONMENT: 'Ambiente'
+    ANALYSIS_TITLE: 'Analisi salute del sistema'
+    ANALYSIS_RUN: 'Avvia analisi'
+    ANALYSIS_PRINT: 'Stampa rapporto'
+    ANALYSIS_LOADING: 'Analisi in corso...'
+    ANALYSIS_FAILURE: 'Analisi non riuscita. Riprova.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Stato del sistema'
+    EMPTY: 'Nessun risultato disponibile per questa esecuzione.'
+  Clesson\Silverstripe\DeveloperTools\Services\AnalysisPdfRenderer:
+    LEGEND: 'Legenda: ERRORE={error}, AVVISO={warning}, SCONOSCIUTO={unknown}, OK={ok}'
+  Clesson\Silverstripe\DeveloperTools\Constants\HealthStatus:
+    OK: 'OK'
+    WARNING: 'Avviso'
+    ERROR: 'Errore'
+    UNKNOWN: 'Non valutabile'
+  Clesson\Silverstripe\DeveloperTools\HealthChecks\VersionSupportHealthCheck:
+    PHP_TITLE: 'Supporto versione PHP'
+    SS_TITLE: 'Supporto framework Silverstripe'
+    DB_TITLE: 'Supporto server database'
+    DB_UNKNOWN: 'Il prodotto database non e valutabile per i controlli ufficiali del ciclo di vita.'
+  Clesson\Silverstripe\DeveloperTools\Services\VersionSupportCheck:
+    UNSUPPORTED_FORMAT: 'Il formato della versione installata non e valutabile.'
+    EOL: 'La versione installata e end-of-life e non riceve piu aggiornamenti di sicurezza.'
+    UPDATE_SOON_EOL: 'E disponibile un aggiornamento e la fine del supporto e vicina.'
+    UPDATE: 'E disponibile un aggiornamento rispetto all''ultima versione stabile.'
+    CURRENT: 'La versione installata e aggiornata e non risultano rischi EOL al momento.'
+    UNKNOWN: 'I dati ufficiali su release o ciclo di vita non sono sufficienti per un confronto affidabile.'
+  Clesson\Silverstripe\DeveloperTools\Services\MailDnsCheck:
+    SPF_TITLE: 'Policy SPF'
+    SPF_DETAIL: 'Dettaglio SPF'
+    SPF_MISSING: 'Nessun record SPF trovato per questo dominio mittente.'
+    SPF_MULTI: 'Trovati piu record SPF, valutazione ambigua.'
+    SPF_PLUS_ALL: 'SPF contiene +all e consente di fatto lo spoofing.'
+    SPF_COMPLEXITY: 'SPF contiene complessita include/redirect potenzialmente rischiosa e va rivisto.'
+    SPF_LOOKUPS: 'SPF sembra superare la complessita consigliata per le query DNS.'
+    SPF_OK: 'Il record SPF e presente e non mostra pattern critici immediati.'
+    DMARC_TITLE: 'Policy DMARC'
+    DMARC_DETAIL: 'Dettaglio DMARC'
+    DMARC_MISSING: 'Nessun record DMARC trovato per questo dominio mittente.'
+    DMARC_MULTI: 'Trovati piu record DMARC, valutazione ambigua.'
+    DMARC_INVALID: 'Il record DMARC non contiene un tag p= valido.'
+    DMARC_NONE: 'La policy DMARC p=none e solo monitoraggio e non rifiuta email contraffatte.'
+    DMARC_OK: 'Record DMARC presente con policy applicativa.'
+    DNS_FAILED: 'Ricerca DNS fallita per questo dominio.'
+    BUDGET: 'Controllo DNS saltato per budget di esecuzione esaurito.'
+

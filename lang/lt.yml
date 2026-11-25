@@ -1,0 +1,16 @@
+lt:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Kurimo irankiai'
+    ENVIRONMENT: 'Aplinka'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analize'
+    TAB_PROJECT_INFORMATION: 'Projekto informacija'
+    ANALYSIS_TITLE: 'Sistemos bukles analize'
+    ANALYSIS_RUN: 'Pradeti analize'
+    ANALYSIS_PRINT: 'Spausdinti ataskaita'
+    ANALYSIS_LOADING: 'Analize vykdoma...'
+    ANALYSIS_FAILURE: 'Analize nepavyko. Bandykite dar karta.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Sistemos bukle'
+    EMPTY: 'Siam vykdymui rezultatu nera.'
+

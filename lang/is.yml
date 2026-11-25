@@ -1,0 +1,16 @@
+is:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Throunartol'
+    ENVIRONMENT: 'Umhverfi'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Greining'
+    TAB_PROJECT_INFORMATION: 'Verkefnaupplysingar'
+    ANALYSIS_TITLE: 'Heilsugreining kerfis'
+    ANALYSIS_RUN: 'Hefja greiningu'
+    ANALYSIS_PRINT: 'Prenta skyrslu'
+    ANALYSIS_LOADING: 'Greining i gangi...'
+    ANALYSIS_FAILURE: 'Greining mistokst. Reyndu aftur.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Stada kerfis'
+    EMPTY: 'Engar nidurstodur fyrir thetta keyrslu.'
+

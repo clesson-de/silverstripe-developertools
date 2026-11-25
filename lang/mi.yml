@@ -1,0 +1,16 @@
+mi:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Taputapu Kaiwhakawhanake'
+    ENVIRONMENT: 'Taiao'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Taatari'
+    TAB_PROJECT_INFORMATION: 'Korero Kaupapa'
+    ANALYSIS_TITLE: 'Taatari hauora punaha'
+    ANALYSIS_RUN: 'Timata taatari'
+    ANALYSIS_PRINT: 'Taia purongo'
+    ANALYSIS_LOADING: 'Kei te rere te taatari...'
+    ANALYSIS_FAILURE: 'I rahua te taatari. Ngana ano.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Tuunga punaha'
+    EMPTY: 'Karekau he hua mo tenei whakahaere.'
+

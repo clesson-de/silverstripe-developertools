@@ -1,0 +1,20 @@
+bg:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Instrumenti za razrabotchitsi'
+    ENVIRONMENT: 'Sreda'
+    ANALYSIS_PRINT_TITLE: 'Doklad za sastoyanieto na sistemata'
+    ANALYSIS_RUN_ERROR: 'Analizat ne moje da bade zavarshen.'
+    ANALYSIS_PDF_ERROR: 'PDF dokladat ne moje da bade generiran.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analiz'
+    TAB_PROJECT_INFORMATION: 'Informatsiya za proekta'
+    ENVIRONMENT: 'Sreda'
+    ANALYSIS_TITLE: 'Analiz na zdraveto na sistemata'
+    ANALYSIS_RUN: 'Startirai analiz'
+    ANALYSIS_PRINT: 'Printirai doklad'
+    ANALYSIS_LOADING: 'Analizat se izpalnyava...'
+    ANALYSIS_FAILURE: 'Analizat beshe neuspeshen. Opitai otnovo.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Sastoyanie na sistemata'
+    EMPTY: 'Nyama nalichni rezultati za tozi cikul.'
+

@@ -1,0 +1,57 @@
+sv:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Developer Tools'
+    ENVIRONMENT: 'Miljo'
+    ANALYSIS_PRINT_TITLE: 'Systemstatusrapport'
+    ANALYSIS_RUN_ERROR: 'Analysen kunde inte slutföras.'
+    ANALYSIS_PDF_ERROR: 'PDF-rapporten kunde inte genereras.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analys'
+    TAB_PROJECT_INFORMATION: 'Projektinformation'
+    ENVIRONMENT: 'Miljo'
+    ANALYSIS_TITLE: 'Systemhalsaanalys'
+    ANALYSIS_RUN: 'Starta analys'
+    ANALYSIS_PRINT: 'Skriv ut rapport'
+    ANALYSIS_LOADING: 'Analys kors...'
+    ANALYSIS_FAILURE: 'Analysen misslyckades. Forsok igen.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Systemstatus'
+    EMPTY: 'Inga kontrollresultat tillgangliga for denna korning.'
+  Clesson\Silverstripe\DeveloperTools\Services\AnalysisPdfRenderer:
+    LEGEND: 'Legend: FEL={error}, VARNING={warning}, OKANT={unknown}, OK={ok}'
+  Clesson\Silverstripe\DeveloperTools\Constants\HealthStatus:
+    OK: 'OK'
+    WARNING: 'Varning'
+    ERROR: 'Fel'
+    UNKNOWN: 'Kan inte bedomas'
+  Clesson\Silverstripe\DeveloperTools\HealthChecks\VersionSupportHealthCheck:
+    PHP_TITLE: 'Stod for PHP-version'
+    SS_TITLE: 'Stod for Silverstripe-ramverket'
+    DB_TITLE: 'Stod for databasserver'
+    DB_UNKNOWN: 'Databasprodukten kan inte bedomas for officiella livscykelkontroller.'
+  Clesson\Silverstripe\DeveloperTools\Services\VersionSupportCheck:
+    UNSUPPORTED_FORMAT: 'Installerat versionsformat kan inte bedomas.'
+    EOL: 'Installerad version ar end-of-life och far inga sakerhetsuppdateringar langre.'
+    UPDATE_SOON_EOL: 'Uppdatering finns och slutet pa support narmar sig.'
+    UPDATE: 'Uppdatering finns jamfort med senaste stabila version.'
+    CURRENT: 'Installerad version ar aktuell och ingen kand EOL-risk finns just nu.'
+    UNKNOWN: 'Officiella release- eller livscykeldata ar otillrackliga for en tillforlitlig jamforelse.'
+  Clesson\Silverstripe\DeveloperTools\Services\MailDnsCheck:
+    SPF_TITLE: 'SPF-policy'
+    SPF_DETAIL: 'SPF-detalj'
+    SPF_MISSING: 'Ingen SPF-post hittades for denna avsandardoman.'
+    SPF_MULTI: 'Flera SPF-poster hittades, utvarderingen ar tvetydig.'
+    SPF_PLUS_ALL: 'SPF innehaller +all och tillater i praktiken spoofing.'
+    SPF_COMPLEXITY: 'SPF innehaller potentiellt riskabel include/redirect-komplexitet och bor granskas.'
+    SPF_LOOKUPS: 'SPF verkar overskrida rekommenderad DNS-lookup-komplexitet.'
+    SPF_OK: 'SPF-post finns och har inget omedelbart kritiskt monster.'
+    DMARC_TITLE: 'DMARC-policy'
+    DMARC_DETAIL: 'DMARC-detalj'
+    DMARC_MISSING: 'Ingen DMARC-post hittades for denna avsandardoman.'
+    DMARC_MULTI: 'Flera DMARC-poster hittades, utvarderingen ar tvetydig.'
+    DMARC_INVALID: 'DMARC-posten saknar en giltig p=-tagg.'
+    DMARC_NONE: 'DMARC-policy p=none ar endast overvakning och avvisar inte forfalskad e-post.'
+    DMARC_OK: 'DMARC-post finns med tvingande policy.'
+    DNS_FAILED: 'DNS-uppslagning misslyckades for denna doman.'
+    BUDGET: 'DNS-kontroll hoppades over eftersom exekveringsbudgeten gick ut.'
+

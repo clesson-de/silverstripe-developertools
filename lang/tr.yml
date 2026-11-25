@@ -1,0 +1,16 @@
+tr:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Gelistirici Araclari'
+    ENVIRONMENT: 'Ortam'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analiz'
+    TAB_PROJECT_INFORMATION: 'Proje Bilgileri'
+    ANALYSIS_TITLE: 'Sistem saglik analizi'
+    ANALYSIS_RUN: 'Analizi baslat'
+    ANALYSIS_PRINT: 'Raporu yazdir'
+    ANALYSIS_LOADING: 'Analiz calisiyor...'
+    ANALYSIS_FAILURE: 'Analiz basarisiz oldu. Tekrar deneyin.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Sistem durumu'
+    EMPTY: 'Bu calistirma icin sonuc yok.'
+

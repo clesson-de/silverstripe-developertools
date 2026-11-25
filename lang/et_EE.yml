@@ -1,0 +1,20 @@
+et_EE:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Arendaja tooriistad'
+    ENVIRONMENT: 'Keskkond'
+    ANALYSIS_PRINT_TITLE: 'Susteemi oleku aruanne'
+    ANALYSIS_RUN_ERROR: 'Analyysi ei saanud lopule viia.'
+    ANALYSIS_PDF_ERROR: 'PDF-aruannet ei saanud luua.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analyys'
+    TAB_PROJECT_INFORMATION: 'Projekti teave'
+    ENVIRONMENT: 'Keskkond'
+    ANALYSIS_TITLE: 'Susteemi tervise analyys'
+    ANALYSIS_RUN: 'Kaivita analyys'
+    ANALYSIS_PRINT: 'Prindi aruanne'
+    ANALYSIS_LOADING: 'Analyys tootab...'
+    ANALYSIS_FAILURE: 'Analyys ebaonnestus. Proovi uuesti.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Susteemi olek'
+    EMPTY: 'Selle kaivituse jaoks pole tulemusi saadaval.'
+

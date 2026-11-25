@@ -1,0 +1,57 @@
+hu:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Developer Tools'
+    ENVIRONMENT: 'Kornyezet'
+    ANALYSIS_PRINT_TITLE: 'Rendszerallapot-jelentes'
+    ANALYSIS_RUN_ERROR: 'Az elemzes nem fejezheto be.'
+    ANALYSIS_PDF_ERROR: 'A PDF-jelentes nem generalhato.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Elemzes'
+    TAB_PROJECT_INFORMATION: 'Projektinformacio'
+    ENVIRONMENT: 'Kornyezet'
+    ANALYSIS_TITLE: 'Rendszerallapot-elemzes'
+    ANALYSIS_RUN: 'Elemzes inditasa'
+    ANALYSIS_PRINT: 'Jelentes nyomtatasa'
+    ANALYSIS_LOADING: 'Elemzes folyamatban...'
+    ANALYSIS_FAILURE: 'Az elemzes sikertelen. Probald ujra.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Rendszerallapot'
+    EMPTY: 'Ehhez a futashoz nincs ellenorzesi eredmeny.'
+  Clesson\Silverstripe\DeveloperTools\Services\AnalysisPdfRenderer:
+    LEGEND: 'Jelmagyarázat: HIBA={error}, FIGYELMEZTETES={warning}, ISMERETLEN={unknown}, OK={ok}'
+  Clesson\Silverstripe\DeveloperTools\Constants\HealthStatus:
+    OK: 'OK'
+    WARNING: 'Figyelmeztetes'
+    ERROR: 'Hiba'
+    UNKNOWN: 'Nem ertekelheto'
+  Clesson\Silverstripe\DeveloperTools\HealthChecks\VersionSupportHealthCheck:
+    PHP_TITLE: 'PHP-verzio tamogatas'
+    SS_TITLE: 'Silverstripe keretrendszer tamogatas'
+    DB_TITLE: 'Adatbazis-szerver tamogatas'
+    DB_UNKNOWN: 'Az adatbazis-termek nem ertekelheto hivatalos eletciklus-ellenorzeshez.'
+  Clesson\Silverstripe\DeveloperTools\Services\VersionSupportCheck:
+    UNSUPPORTED_FORMAT: 'A telepitett verzio formatuma nem ertekelheto.'
+    EOL: 'A telepitett verzio eletciklus-vegen van, mar nem kap biztonsagi frissiteseket.'
+    UPDATE_SOON_EOL: 'Frissites erheto el, es a tamogatas vege kozel van.'
+    UPDATE: 'Frissites erheto el a legujabb stabil verziohoz kepest.'
+    CURRENT: 'A telepitett verzio aktualis, jelenleg nincs ismert EOL-kockazat.'
+    UNKNOWN: 'A hivatalos release vagy eletciklus adatok nem elegendoek a megbizhato osszehasonlitashoz.'
+  Clesson\Silverstripe\DeveloperTools\Services\MailDnsCheck:
+    SPF_TITLE: 'SPF-szabalyzat'
+    SPF_DETAIL: 'SPF-reszlet'
+    SPF_MISSING: 'Ehhez a kuldo domainhez nem talalhato SPF rekord.'
+    SPF_MULTI: 'Tobb SPF rekord talalhato, az ertekeles ketertelmu.'
+    SPF_PLUS_ALL: 'Az SPF +all elemet tartalmaz, ami gyakorlatilag lehetove teszi a spoofingot.'
+    SPF_COMPLEXITY: 'Az SPF potencialisan kockazatos include/redirect osszetettseget tartalmaz, ellenorizni kell.'
+    SPF_LOOKUPS: 'Az SPF valoszinuleg tul bonyolult DNS-lekerdezeseket igenyel.'
+    SPF_OK: 'Az SPF rekord jelen van, azonnali kritikus minta nelkul.'
+    DMARC_TITLE: 'DMARC-szabalyzat'
+    DMARC_DETAIL: 'DMARC-reszlet'
+    DMARC_MISSING: 'Ehhez a kuldo domainhez nem talalhato DMARC rekord.'
+    DMARC_MULTI: 'Tobb DMARC rekord talalhato, az ertekeles ketertelmu.'
+    DMARC_INVALID: 'A DMARC rekord nem tartalmaz ervenyes p= taget.'
+    DMARC_NONE: 'A DMARC p=none csak monitorozas, nem utasitja vissza a hamisitott leveleket.'
+    DMARC_OK: 'A DMARC rekord ervenyesen kenyszeritett szabalyzattal jelen van.'
+    DNS_FAILED: 'A DNS-lekerdezes sikertelen ehhez a domainhez.'
+    BUDGET: 'A DNS-ellenorzes kihagyva, mert lejart a futasi koltsegkeret.'
+

@@ -1,0 +1,20 @@
+bs:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Alati za developere'
+    ENVIRONMENT: 'Okruzenje'
+    ANALYSIS_PRINT_TITLE: 'Izvjestaj o stanju sistema'
+    ANALYSIS_RUN_ERROR: 'Analizu nije moguce dovrsiti.'
+    ANALYSIS_PDF_ERROR: 'PDF izvjestaj nije moguce generisati.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analiza'
+    TAB_PROJECT_INFORMATION: 'Informacije o projektu'
+    ENVIRONMENT: 'Okruzenje'
+    ANALYSIS_TITLE: 'Analiza zdravlja sistema'
+    ANALYSIS_RUN: 'Pokreni analizu'
+    ANALYSIS_PRINT: 'Stampaj izvjestaj'
+    ANALYSIS_LOADING: 'Analiza u toku...'
+    ANALYSIS_FAILURE: 'Analiza nije uspjela. Pokusajte ponovo.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Stanje sistema'
+    EMPTY: 'Nema dostupnih rezultata za ovo pokretanje.'
+

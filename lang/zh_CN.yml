@@ -1,0 +1,16 @@
+zh_CN:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Kaifa Gongju'
+    ENVIRONMENT: 'Huanjing'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Fenxi'
+    TAB_PROJECT_INFORMATION: 'Xiangmu Xinxi'
+    ANALYSIS_TITLE: 'Xitong Jiankang Fenxi'
+    ANALYSIS_RUN: 'Kaishi Fenxi'
+    ANALYSIS_PRINT: 'Dayin Baogao'
+    ANALYSIS_LOADING: 'Fenxi Jinxing Zhong...'
+    ANALYSIS_FAILURE: 'Fenxi shibai. Qing chongshi.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Xitong Zhuangtai'
+    EMPTY: 'Benci jiancha mei you keyong jieguo.'
+

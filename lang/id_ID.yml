@@ -1,0 +1,16 @@
+id_ID:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Alat Pengembang'
+    ENVIRONMENT: 'Lingkungan'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analisis'
+    TAB_PROJECT_INFORMATION: 'Informasi Proyek'
+    ANALYSIS_TITLE: 'Analisis kesehatan sistem'
+    ANALYSIS_RUN: 'Mulai analisis'
+    ANALYSIS_PRINT: 'Cetak laporan'
+    ANALYSIS_LOADING: 'Analisis berjalan...'
+    ANALYSIS_FAILURE: 'Analisis gagal. Coba lagi.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Status sistem'
+    EMPTY: 'Tidak ada hasil untuk eksekusi ini.'
+

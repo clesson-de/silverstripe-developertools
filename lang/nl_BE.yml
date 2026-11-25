@@ -1,0 +1,57 @@
+nl_BE:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Developer Tools'
+    ENVIRONMENT: 'Omgeving'
+    ANALYSIS_PRINT_TITLE: 'Systeemstatusrapport'
+    ANALYSIS_RUN_ERROR: 'De analyse kon niet worden voltooid.'
+    ANALYSIS_PDF_ERROR: 'Het PDF-rapport kon niet worden gegenereerd.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analyse'
+    TAB_PROJECT_INFORMATION: 'Projectinformatie'
+    ENVIRONMENT: 'Omgeving'
+    ANALYSIS_TITLE: 'Systeemgezondheidsanalyse'
+    ANALYSIS_RUN: 'Analyse starten'
+    ANALYSIS_PRINT: 'Rapport afdrukken'
+    ANALYSIS_LOADING: 'Analyse wordt uitgevoerd...'
+    ANALYSIS_FAILURE: 'Analyse mislukt. Probeer opnieuw.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Systeemstatus'
+    EMPTY: 'Geen resultaten beschikbaar voor deze controle.'
+  Clesson\Silverstripe\DeveloperTools\Services\AnalysisPdfRenderer:
+    LEGEND: 'Legenda: FOUT={error}, WAARSCHUWING={warning}, ONBEKEND={unknown}, OK={ok}'
+  Clesson\Silverstripe\DeveloperTools\Constants\HealthStatus:
+    OK: 'OK'
+    WARNING: 'Waarschuwing'
+    ERROR: 'Fout'
+    UNKNOWN: 'Niet beoordeelbaar'
+  Clesson\Silverstripe\DeveloperTools\HealthChecks\VersionSupportHealthCheck:
+    PHP_TITLE: 'PHP-versieondersteuning'
+    SS_TITLE: 'Silverstripe-frameworkondersteuning'
+    DB_TITLE: 'Databaseserverondersteuning'
+    DB_UNKNOWN: 'Het databaseproduct is niet automatisch beoordeelbaar voor officiele lifecyclecontroles.'
+  Clesson\Silverstripe\DeveloperTools\Services\VersionSupportCheck:
+    UNSUPPORTED_FORMAT: 'Het geinstalleerde versieformaat is niet beoordeelbaar.'
+    EOL: 'De geinstalleerde versie is end-of-life en ontvangt geen beveiligingsupdates meer.'
+    UPDATE_SOON_EOL: 'Er is een update beschikbaar en het einde van ondersteuning nadert.'
+    UPDATE: 'Er is een update beschikbaar t.o.v. de nieuwste stabiele versie.'
+    CURRENT: 'De geinstalleerde versie is actueel en er is momenteel geen bekend EOL-risico.'
+    UNKNOWN: 'Officiele release- of lifecyclegegevens zijn momenteel onvoldoende voor een betrouwbare vergelijking.'
+  Clesson\Silverstripe\DeveloperTools\Services\MailDnsCheck:
+    SPF_TITLE: 'SPF-beleid'
+    SPF_DETAIL: 'SPF-detail'
+    SPF_MISSING: 'Geen SPF-record gevonden voor dit afzenderdomein.'
+    SPF_MULTI: 'Meerdere SPF-records gevonden; beoordeling is ambigu.'
+    SPF_PLUS_ALL: 'SPF bevat +all en staat spoofing effectief toe.'
+    SPF_COMPLEXITY: 'SPF bevat potentieel risicovolle include/redirect-complexiteit en moet worden gecontroleerd.'
+    SPF_LOOKUPS: 'SPF lijkt de aanbevolen DNS-lookupcomplexiteit te overschrijden.'
+    SPF_OK: 'SPF-record aanwezig zonder direct kritisch patroon.'
+    DMARC_TITLE: 'DMARC-beleid'
+    DMARC_DETAIL: 'DMARC-detail'
+    DMARC_MISSING: 'Geen DMARC-record gevonden voor dit afzenderdomein.'
+    DMARC_MULTI: 'Meerdere DMARC-records gevonden; beoordeling is ambigu.'
+    DMARC_INVALID: 'DMARC-record bevat geen geldige p=-tag.'
+    DMARC_NONE: 'DMARC-beleid p=none is alleen monitoring en wijst vervalste e-mail niet af.'
+    DMARC_OK: 'DMARC-record aanwezig met afdwingbaar beleid.'
+    DNS_FAILED: 'DNS-opzoeking voor dit domein is mislukt.'
+    BUDGET: 'DNS-controle overgeslagen omdat het uitvoeringsbudget is verlopen.'
+

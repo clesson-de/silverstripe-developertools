@@ -1,0 +1,16 @@
+uk:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Instrumenty rozrobnyka'
+    ENVIRONMENT: 'Seredovyshche'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analiz'
+    TAB_PROJECT_INFORMATION: 'Informatsiia pro proekt'
+    ANALYSIS_TITLE: 'Analiz stanu systemy'
+    ANALYSIS_RUN: 'Zapustyty analiz'
+    ANALYSIS_PRINT: 'Druk zvitu'
+    ANALYSIS_LOADING: 'Analiz vykonuietsia...'
+    ANALYSIS_FAILURE: 'Analiz ne vdavsia. Sprobuite znovu.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Stan systemy'
+    EMPTY: 'Dlia tsioho zapusku nemaie rezultatіv.'
+

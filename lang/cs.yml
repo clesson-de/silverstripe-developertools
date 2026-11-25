@@ -1,0 +1,20 @@
+cs:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Vyvojarske nastroje'
+    ENVIRONMENT: 'Prostredi'
+    ANALYSIS_PRINT_TITLE: 'Zprava o stavu systemu'
+    ANALYSIS_RUN_ERROR: 'Analyzu se nepodarilo dokoncit.'
+    ANALYSIS_PDF_ERROR: 'PDF zpravu se nepodarilo vygenerovat.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analyza'
+    TAB_PROJECT_INFORMATION: 'Informace o projektu'
+    ENVIRONMENT: 'Prostredi'
+    ANALYSIS_TITLE: 'Analyza zdravi systemu'
+    ANALYSIS_RUN: 'Spustit analyzu'
+    ANALYSIS_PRINT: 'Tisk zpravy'
+    ANALYSIS_LOADING: 'Analyza probiha...'
+    ANALYSIS_FAILURE: 'Analyza selhala. Zkuste to znovu.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Stav systemu'
+    EMPTY: 'Pro tento beh nejsou k dispozici zadne vysledky.'
+

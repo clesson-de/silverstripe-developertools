@@ -1,0 +1,57 @@
+fi:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Developer Tools'
+    ENVIRONMENT: 'Ymparisto'
+    ANALYSIS_PRINT_TITLE: 'Jarjestelman tilaraportti'
+    ANALYSIS_RUN_ERROR: 'Analyysia ei voitu suorittaa loppuun.'
+    ANALYSIS_PDF_ERROR: 'PDF-raporttia ei voitu luoda.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analyysi'
+    TAB_PROJECT_INFORMATION: 'Projektin tiedot'
+    ENVIRONMENT: 'Ymparisto'
+    ANALYSIS_TITLE: 'Jarjestelman kuntoanalyysi'
+    ANALYSIS_RUN: 'Kaynnista analyysi'
+    ANALYSIS_PRINT: 'Tulosta raportti'
+    ANALYSIS_LOADING: 'Analyysi kaynnissa...'
+    ANALYSIS_FAILURE: 'Analyysi epaonnistui. Yrita uudelleen.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Jarjestelman tila'
+    EMPTY: 'Talle ajolle ei ole tarkastustuloksia.'
+  Clesson\Silverstripe\DeveloperTools\Services\AnalysisPdfRenderer:
+    LEGEND: 'Selite: VIRHE={error}, VAROITUS={warning}, TUNTEMATON={unknown}, OK={ok}'
+  Clesson\Silverstripe\DeveloperTools\Constants\HealthStatus:
+    OK: 'OK'
+    WARNING: 'Varoitus'
+    ERROR: 'Virhe'
+    UNKNOWN: 'Ei arvioitavissa'
+  Clesson\Silverstripe\DeveloperTools\HealthChecks\VersionSupportHealthCheck:
+    PHP_TITLE: 'PHP-version tuki'
+    SS_TITLE: 'Silverstripe-kehyksen tuki'
+    DB_TITLE: 'Tietokantapalvelimen tuki'
+    DB_UNKNOWN: 'Tietokantatuotetta ei voida arvioida virallisissa elinkaaritarkistuksissa.'
+  Clesson\Silverstripe\DeveloperTools\Services\VersionSupportCheck:
+    UNSUPPORTED_FORMAT: 'Asennetun version muotoa ei voida arvioida.'
+    EOL: 'Asennettu versio on elinkaarensa paassa eika saa enaa tietoturvapaivityksia.'
+    UPDATE_SOON_EOL: 'Paivitys on saatavilla ja tuen paattyminen on lahella.'
+    UPDATE: 'Paivitys on saatavilla verrattuna uusimpaan vakaaseen versioon.'
+    CURRENT: 'Asennettu versio on ajan tasalla eika tunnettua EOL-riskiä ole nyt.'
+    UNKNOWN: 'Viralliset julkaisu- tai elinkaaritiedot eivat riita luotettavaan vertailuun.'
+  Clesson\Silverstripe\DeveloperTools\Services\MailDnsCheck:
+    SPF_TITLE: 'SPF-kaytanto'
+    SPF_DETAIL: 'SPF-yksityiskohta'
+    SPF_MISSING: 'Talle lahettajadomeenille ei loytynyt SPF-tietuetta.'
+    SPF_MULTI: 'Loytyi useita SPF-tietueita; arviointi on epaselva.'
+    SPF_PLUS_ALL: 'SPF sisaltaa +all ja sallii kaytannossa spoofingin.'
+    SPF_COMPLEXITY: 'SPF sisaltaa mahdollisesti riskialtista include/redirect-monimutkaisuutta ja tulisi tarkistaa.'
+    SPF_LOOKUPS: 'SPF nayttaa ylittavan suositellun DNS-kyselyjen monimutkaisuuden.'
+    SPF_OK: 'SPF-tietue on olemassa eika sisalla valitonta kriittista kuviota.'
+    DMARC_TITLE: 'DMARC-kaytanto'
+    DMARC_DETAIL: 'DMARC-yksityiskohta'
+    DMARC_MISSING: 'Talle lahettajadomeenille ei loytynyt DMARC-tietuetta.'
+    DMARC_MULTI: 'Loytyi useita DMARC-tietueita; arviointi on epaselva.'
+    DMARC_INVALID: 'DMARC-tietueessa ei ole kelvollista p=-tagia.'
+    DMARC_NONE: 'DMARC-kaytanto p=none on vain seurantaa eika hylkaa vaarennettya sahkopostia.'
+    DMARC_OK: 'DMARC-tietue on olemassa ja kaytantoa valvotaan.'
+    DNS_FAILED: 'DNS-haku epaonnistui tälle domainille.'
+    BUDGET: 'DNS-tarkistus ohitettiin, koska suoritusbudjetti paattyi.'
+

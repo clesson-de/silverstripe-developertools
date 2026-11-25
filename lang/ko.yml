@@ -1,0 +1,17 @@
+ko:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Developer Tools'
+    ENVIRONMENT: 'Hwangyeong'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Bunseok'
+    TAB_PROJECT_INFORMATION: 'Peurojekteu Jeongbo'
+    ANALYSIS_TITLE: 'Siseutem Geongang Bunseok'
+    ANALYSIS_RUN: 'Bunseok Sijak'
+    ANALYSIS_PRINT: 'Bogoseo Insoe'
+    ANALYSIS_LOADING: 'Bunseok jung...'
+    ANALYSIS_FAILURE: 'Bunseok silpae. Dasi sidohae juseyo.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Siseutem Sangtae'
+    EMPTY: 'I silhaeng-e daehan gyeolgwa-ga eopseumnida.'
+
+

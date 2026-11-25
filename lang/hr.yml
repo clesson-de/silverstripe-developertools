@@ -1,0 +1,16 @@
+hr:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Razvojni alati'
+    ENVIRONMENT: 'Okruzenje'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analiza'
+    TAB_PROJECT_INFORMATION: 'Informacije o projektu'
+    ANALYSIS_TITLE: 'Analiza stanja sustava'
+    ANALYSIS_RUN: 'Pokreni analizu'
+    ANALYSIS_PRINT: 'Ispisi izvjestaj'
+    ANALYSIS_LOADING: 'Analiza u tijeku...'
+    ANALYSIS_FAILURE: 'Analiza nije uspjela. Pokusajte ponovo.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Stanje sustava'
+    EMPTY: 'Nema rezultata za ovo pokretanje.'
+

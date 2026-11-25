@@ -1,0 +1,57 @@
+ar:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'ادوات المطور'
+    ENVIRONMENT: 'البيئة'
+    ANALYSIS_PRINT_TITLE: 'تقرير حالة النظام'
+    ANALYSIS_RUN_ERROR: 'تعذر اكمال التحليل.'
+    ANALYSIS_PDF_ERROR: 'تعذر انشاء تقرير PDF.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'تحليل'
+    TAB_PROJECT_INFORMATION: 'معلومات المشروع'
+    ENVIRONMENT: 'البيئة'
+    ANALYSIS_TITLE: 'تحليل صحة النظام'
+    ANALYSIS_RUN: 'بدء التحليل'
+    ANALYSIS_PRINT: 'طباعة التقرير'
+    ANALYSIS_LOADING: 'التحليل قيد التشغيل...'
+    ANALYSIS_FAILURE: 'فشل التحليل. يرجى المحاولة مرة اخرى.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'حالة النظام'
+    EMPTY: 'لا توجد نتائج تحقق متاحة لهذا التشغيل.'
+  Clesson\Silverstripe\DeveloperTools\Services\AnalysisPdfRenderer:
+    LEGEND: 'الوسيلة: خطا={error}، تحذير={warning}، غير معروف={unknown}، موافق={ok}'
+  Clesson\Silverstripe\DeveloperTools\Constants\HealthStatus:
+    OK: 'موافق'
+    WARNING: 'تحذير'
+    ERROR: 'خطا'
+    UNKNOWN: 'غير قابل للتقييم'
+  Clesson\Silverstripe\DeveloperTools\HealthChecks\VersionSupportHealthCheck:
+    PHP_TITLE: 'دعم اصدار PHP'
+    SS_TITLE: 'دعم اطار Silverstripe'
+    DB_TITLE: 'دعم خادم قاعدة البيانات'
+    DB_UNKNOWN: 'لا يمكن تقييم منتج قاعدة البيانات لفحوصات دورة الحياة الرسمية.'
+  Clesson\Silverstripe\DeveloperTools\Services\VersionSupportCheck:
+    UNSUPPORTED_FORMAT: 'تنسيق الاصدار المثبت غير قابل للتقييم.'
+    EOL: 'الاصدار المثبت وصل الى نهاية العمر ولا يتلقى اصلاحات امنية.'
+    UPDATE_SOON_EOL: 'يتوفر تحديث ونهاية الدعم قريبة.'
+    UPDATE: 'يتوفر تحديث مقارنة باحدث اصدار مستقر.'
+    CURRENT: 'الاصدار المثبت حديث ولا توجد مخاطر EOL معروفة حاليا.'
+    UNKNOWN: 'بيانات الاصدار او دورة الحياة الرسمية غير كافية للمقارنة الموثوقة.'
+  Clesson\Silverstripe\DeveloperTools\Services\MailDnsCheck:
+    SPF_TITLE: 'سياسة SPF'
+    SPF_DETAIL: 'تفصيل SPF'
+    SPF_MISSING: 'لم يتم العثور على سجل SPF لهذا نطاق المرسل.'
+    SPF_MULTI: 'تم العثور على عدة سجلات SPF والتقييم غير واضح.'
+    SPF_PLUS_ALL: 'يحتوي SPF على +all مما يسمح عمليا بانتحال البريد.'
+    SPF_COMPLEXITY: 'يحتوي SPF على تعقيد include/redirect قد يكون خطرا ويجب مراجعته.'
+    SPF_LOOKUPS: 'يبدو ان SPF يتجاوز التعقيد الموصى به لاستعلامات DNS.'
+    SPF_OK: 'سجل SPF موجود ولا يحتوي نمطا حرجا فوريا.'
+    DMARC_TITLE: 'سياسة DMARC'
+    DMARC_DETAIL: 'تفصيل DMARC'
+    DMARC_MISSING: 'لم يتم العثور على سجل DMARC لهذا نطاق المرسل.'
+    DMARC_MULTI: 'تم العثور على عدة سجلات DMARC والتقييم غير واضح.'
+    DMARC_INVALID: 'سجل DMARC لا يحتوي على وسم p= صالح.'
+    DMARC_NONE: 'سياسة DMARC بالقيمة p=none للمراقبة فقط ولا ترفض الرسائل المزورة.'
+    DMARC_OK: 'سجل DMARC موجود مع سياسة فرض.'
+    DNS_FAILED: 'فشل استعلام DNS لهذا النطاق.'
+    BUDGET: 'تم تخطي فحص DNS بسبب انتهاء ميزانية التنفيذ.'
+

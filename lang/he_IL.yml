@@ -1,0 +1,20 @@
+he_IL:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Klei Mefateach'
+    ENVIRONMENT: 'Svivah'
+    ANALYSIS_PRINT_TITLE: 'Doch matzav maarechet'
+    ANALYSIS_RUN_ERROR: 'Lo nitan lehashlim et hantiluch.'
+    ANALYSIS_PDF_ERROR: 'Lo nitan litzor doch PDF.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Nituach'
+    TAB_PROJECT_INFORMATION: 'Meida al haproject'
+    ENVIRONMENT: 'Svivah'
+    ANALYSIS_TITLE: 'Nituach briut maarechet'
+    ANALYSIS_RUN: 'Hatchal nituach'
+    ANALYSIS_PRINT: 'Hadpasat doch'
+    ANALYSIS_LOADING: 'Nituach beritzah...'
+    ANALYSIS_FAILURE: 'Hanituach nikhshal. Nesa shuv.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Matzav maarechet'
+    EMPTY: 'Ein tozaot bedika zminot laharatzah zo.'
+

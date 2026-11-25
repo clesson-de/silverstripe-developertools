@@ -1,0 +1,57 @@
+no:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Developer Tools'
+    ENVIRONMENT: 'Miljo'
+    ANALYSIS_PRINT_TITLE: 'Rapport om systemstatus'
+    ANALYSIS_RUN_ERROR: 'Analysen kunne ikke fullfores.'
+    ANALYSIS_PDF_ERROR: 'PDF-rapporten kunne ikke genereres.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analyse'
+    TAB_PROJECT_INFORMATION: 'Prosjektinformasjon'
+    ENVIRONMENT: 'Miljo'
+    ANALYSIS_TITLE: 'Systemhelseanalyse'
+    ANALYSIS_RUN: 'Start analyse'
+    ANALYSIS_PRINT: 'Skriv ut rapport'
+    ANALYSIS_LOADING: 'Analyse kjores...'
+    ANALYSIS_FAILURE: 'Analysen feilet. Prov igjen.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Systemstatus'
+    EMPTY: 'Ingen kontrollresultater tilgjengelig for denne kjoringen.'
+  Clesson\Silverstripe\DeveloperTools\Services\AnalysisPdfRenderer:
+    LEGEND: 'Forklaring: FEIL={error}, ADVARSEL={warning}, UKJENT={unknown}, OK={ok}'
+  Clesson\Silverstripe\DeveloperTools\Constants\HealthStatus:
+    OK: 'OK'
+    WARNING: 'Advarsel'
+    ERROR: 'Feil'
+    UNKNOWN: 'Ikke vurderbar'
+  Clesson\Silverstripe\DeveloperTools\HealthChecks\VersionSupportHealthCheck:
+    PHP_TITLE: 'Stotte for PHP-versjon'
+    SS_TITLE: 'Stotte for Silverstripe-rammeverket'
+    DB_TITLE: 'Stotte for databaseserver'
+    DB_UNKNOWN: 'Databaseproduktet kan ikke vurderes for offisielle livssyklus-sjekker.'
+  Clesson\Silverstripe\DeveloperTools\Services\VersionSupportCheck:
+    UNSUPPORTED_FORMAT: 'Installert versjonsformat kan ikke vurderes.'
+    EOL: 'Installert versjon er end-of-life og mottar ikke lenger sikkerhetsoppdateringer.'
+    UPDATE_SOON_EOL: 'Oppdatering er tilgjengelig og slutt pa stotte naermer seg.'
+    UPDATE: 'Oppdatering er tilgjengelig sammenlignet med siste stabile versjon.'
+    CURRENT: 'Installert versjon er oppdatert og ingen kjent EOL-risiko finnes na.'
+    UNKNOWN: 'Offisielle release- eller livssyklusdata er utilstrekkelige for en palitelig sammenligning.'
+  Clesson\Silverstripe\DeveloperTools\Services\MailDnsCheck:
+    SPF_TITLE: 'SPF-policy'
+    SPF_DETAIL: 'SPF-detalj'
+    SPF_MISSING: 'Ingen SPF-post funnet for dette avsenderdomenet.'
+    SPF_MULTI: 'Flere SPF-poster ble funnet, vurderingen er tvetydig.'
+    SPF_PLUS_ALL: 'SPF inneholder +all og tillater i praksis spoofing.'
+    SPF_COMPLEXITY: 'SPF inneholder potensielt risikabel include/redirect-kompleksitet og bor gjennomgas.'
+    SPF_LOOKUPS: 'SPF ser ut til a overskride anbefalt DNS-oppslagskompleksitet.'
+    SPF_OK: 'SPF-post er tilstede og har ingen umiddelbart kritisk pattern.'
+    DMARC_TITLE: 'DMARC-policy'
+    DMARC_DETAIL: 'DMARC-detalj'
+    DMARC_MISSING: 'Ingen DMARC-post funnet for dette avsenderdomenet.'
+    DMARC_MULTI: 'Flere DMARC-poster ble funnet, vurderingen er tvetydig.'
+    DMARC_INVALID: 'DMARC-posten mangler gyldig p=-tag.'
+    DMARC_NONE: 'DMARC-policy p=none er kun overvaking og avviser ikke forfalsket e-post.'
+    DMARC_OK: 'DMARC-post finnes med handhevende policy.'
+    DNS_FAILED: 'DNS-oppslag feilet for dette domenet.'
+    BUDGET: 'DNS-sjekk hoppet over fordi kjorebudsjettet utlop.'
+

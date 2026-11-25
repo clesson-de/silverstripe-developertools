@@ -1,0 +1,20 @@
+el:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Ergaleia Developer'
+    ENVIRONMENT: 'Perivallon'
+    ANALYSIS_PRINT_TITLE: 'Anafora katastasis systimatos'
+    ANALYSIS_RUN_ERROR: 'I analysi den mporouse na oloklirothei.'
+    ANALYSIS_PDF_ERROR: 'I anafora PDF den mporouse na dimiourgithei.'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analysi'
+    TAB_PROJECT_INFORMATION: 'Plirofories ergou'
+    ENVIRONMENT: 'Perivallon'
+    ANALYSIS_TITLE: 'Analysi ygeias systimatos'
+    ANALYSIS_RUN: 'Enarksi analysis'
+    ANALYSIS_PRINT: 'Ektiposi anaforas'
+    ANALYSIS_LOADING: 'I analysi ekteleitai...'
+    ANALYSIS_FAILURE: 'I analysi apetyxe. Dokimaste ksana.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Katastasi systimatos'
+    EMPTY: 'Den yparxoun apotelesmata elegxou gia aytin tin ektelesi.'
+

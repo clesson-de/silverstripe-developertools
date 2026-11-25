@@ -1,0 +1,16 @@
+lv:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Izstradataja riki'
+    ENVIRONMENT: 'Vide'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analize'
+    TAB_PROJECT_INFORMATION: 'Projekta informacija'
+    ANALYSIS_TITLE: 'Sistemas veselibas analize'
+    ANALYSIS_RUN: 'Sakt analizi'
+    ANALYSIS_PRINT: 'Druket atskaiti'
+    ANALYSIS_LOADING: 'Analize notiek...'
+    ANALYSIS_FAILURE: 'Analize neizdevas. Ludzu, meginiet velreiz.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Sistemas statuss'
+    EMPTY: 'Saim izpildes reizei nav pieejamu rezultatu.'
+

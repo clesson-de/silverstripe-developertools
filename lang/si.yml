@@ -1,0 +1,16 @@
+si:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Developer Tools'
+    ENVIRONMENT: 'Parisaraya'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Vishleshana'
+    TAB_PROJECT_INFORMATION: 'Vyapara thora thuru'
+    ANALYSIS_TITLE: 'Paddhathi saukya vishleshana'
+    ANALYSIS_RUN: 'Vishleshana arambha karanna'
+    ANALYSIS_PRINT: 'Vartha mudrana karanna'
+    ANALYSIS_LOADING: 'Vishleshana yatin...'
+    ANALYSIS_FAILURE: 'Vishleshanaya asamath. Nawatha uthsaha karanna.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Paddhathi thathwaya'
+    EMPTY: 'Me dhavanaya sandaha prathiphala netha.'
+

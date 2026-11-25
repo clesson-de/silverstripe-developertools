@@ -1,0 +1,16 @@
+sk:
+  Clesson\Silverstripe\DeveloperTools\Admins\DeveloperToolsAdmin:
+    MENUTITLE: 'Vyvojarske nastroje'
+    ENVIRONMENT: 'Prostredie'
+  Clesson\Silverstripe\DeveloperTools\Forms\AnalysisTabSet:
+    TAB_ANALYSIS: 'Analyza'
+    TAB_PROJECT_INFORMATION: 'Informacie o projekte'
+    ANALYSIS_TITLE: 'Analyza zdravia systemu'
+    ANALYSIS_RUN: 'Spustit analyzu'
+    ANALYSIS_PRINT: 'Tlacit spravu'
+    ANALYSIS_LOADING: 'Analyza prebieha...'
+    ANALYSIS_FAILURE: 'Analyza zlyhala. Skuste to znova.'
+  Clesson\Silverstripe\DeveloperTools\Services\HealthReportRenderer:
+    TITLE: 'Stav systemu'
+    EMPTY: 'Pre toto spustenie nie su dostupne ziadne vysledky.'
+
